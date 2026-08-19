@@ -1,0 +1,179 @@
+import type { Metadata } from "next";
+import { PageHeader } from "@/components/app/page-header";
+import { IntegrationsBoard } from "@/app/app/integrations/integrations-board";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
+import { ENGINES, ENGINE_IDS } from "@/lib/config/engines";
+import { getProviderStatuses } from "@/lib/ai-engines/registry";
+import { isGoogleOAuthConfigured } from "@/lib/integrations/google-oauth";
+import { isPagespeedConfigured } from "@/lib/integrations/pagespeed";
+import { isBingConfigured } from "@/lib/integrations/bing";
+import { isEncryptionConfigured } from "@/lib/security/encryption";
+import { loadPageContext } from "@/lib/data/project-context";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import type { IntegrationStatusDb } from "@/lib/db/types";
+
+export const metadata: Metadata = { title: "Integrations" };
+
+export interface IntegrationCard {
+  provider: string;
+  name: string;
+  vendor: string;
+  description: string;
+  status: IntegrationStatusDb;
+  statusMessage: string | null;
+  displayName: string | null;
+  lastSyncedAt: string | null;
+  kind: "oauth" | "api_key" | "server_key";
+  canSync: boolean;
+}
+
+export default async function IntegrationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { project, canWrite } = await loadPageContext(searchParams);
+  const params = await searchParams;
+  const supabase = await createServerSupabaseClient();
+
+  const [{ data: connections }, { data: gsc }, { data: bing }, { data: ga4 }] = await Promise.all([
+    supabase.from("integration_connections").select("*").eq("project_id", project.id),
+    supabase.from("search_console_connections").select("*").eq("project_id", project.id).maybeSingle(),
+    supabase.from("bing_connections").select("*").eq("project_id", project.id).maybeSingle(),
+    supabase.from("analytics_connections").select("*").eq("project_id", project.id).maybeSingle(),
+  ]);
+
+  const connectionByProvider = new Map((connections ?? []).map((row) => [row.provider, row]));
+  const providerStatuses = getProviderStatuses();
+
+  const searchCards: IntegrationCard[] = [
+    {
+      provider: "google_search_console",
+      name: "Google Search Console",
+      vendor: "Google",
+      description:
+        "Clicks, impressions, CTR, average position, queries, pages, countries and devices. Powers striking-distance and low-CTR opportunities.",
+      status: !isGoogleOAuthConfigured()
+        ? "configuration_required"
+        : gsc
+          ? "connected"
+          : (connectionByProvider.get("google_search_console")?.status ?? "not_connected"),
+      statusMessage: !isGoogleOAuthConfigured()
+        ? "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are not set on this deployment."
+        : (connectionByProvider.get("google_search_console")?.last_error ?? null),
+      displayName: gsc?.site_url ?? connectionByProvider.get("google_search_console")?.display_name ?? null,
+      lastSyncedAt: gsc?.last_synced_at ?? null,
+      kind: "oauth",
+      canSync: Boolean(gsc),
+    },
+    {
+      provider: "bing_webmaster",
+      name: "Bing Webmaster Tools",
+      vendor: "Microsoft",
+      description:
+        "Traffic, keywords, crawl and index information from Bing — the index that also feeds Microsoft Copilot.",
+      status: bing ? "connected" : isBingConfigured() ? "not_connected" : "configuration_required",
+      statusMessage: isBingConfigured()
+        ? (connectionByProvider.get("bing_webmaster")?.last_error ?? null)
+        : "Add a Bing Webmaster API key to connect.",
+      displayName: bing?.site_url ?? null,
+      lastSyncedAt: bing?.last_synced_at ?? null,
+      kind: "api_key",
+      canSync: Boolean(bing),
+    },
+    {
+      provider: "google_analytics",
+      name: "Google Analytics 4",
+      vendor: "Google",
+      description:
+        "Optional. Organic sessions, landing pages, engagement, key events, and the AI referral traffic report.",
+      status: ga4 ? "connected" : isGoogleOAuthConfigured() ? "not_connected" : "configuration_required",
+      statusMessage: isGoogleOAuthConfigured()
+        ? (connectionByProvider.get("google_analytics")?.last_error ?? null)
+        : "Google OAuth is not configured on this deployment.",
+      displayName: ga4?.property_name ?? ga4?.property_id ?? null,
+      lastSyncedAt: ga4?.last_synced_at ?? null,
+      kind: "oauth",
+      canSync: Boolean(ga4),
+    },
+    {
+      provider: "pagespeed",
+      name: "PageSpeed Insights",
+      vendor: "Google",
+      description:
+        "Mobile and desktop performance, accessibility, best practices and SEO scores on your most important pages.",
+      status: isPagespeedConfigured() ? "connected" : "configuration_required",
+      statusMessage: isPagespeedConfigured()
+        ? null
+        : "GOOGLE_PAGESPEED_API_KEY is not set on this deployment.",
+      displayName: isPagespeedConfigured() ? "Configured on this deployment" : null,
+      lastSyncedAt: connectionByProvider.get("pagespeed")?.last_synced_at ?? null,
+      kind: "server_key",
+      canSync: false,
+    },
+  ];
+
+  const engineCards: IntegrationCard[] = ENGINE_IDS.map((engineId) => {
+    const status = providerStatuses.find((entry) => entry.id === engineId);
+    const engine = ENGINES[engineId];
+    return {
+      provider: engineId,
+      name: engine.name,
+      vendor: engine.vendor,
+      description: engine.observationNote,
+      status: status?.configured ? "connected" : "configuration_required",
+      statusMessage: status?.configured
+        ? null
+        : (status?.message ?? `${engine.envKeys.join(", ")} is not set on this deployment.`),
+      displayName: status?.configured ? "Configured on this deployment" : null,
+      lastSyncedAt: null,
+      kind: "server_key",
+      canSync: false,
+    };
+  });
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Integrations"
+        description="Connect the data sources that make your measurements complete. We never show a token or key back to the browser."
+      />
+
+      {typeof params["error"] === "string" ? (
+        <Alert variant="destructive">
+          <InfoIcon />
+          <AlertDescription>{params["error"]}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {typeof params["connected"] === "string" ? (
+        <Alert variant="success">
+          <InfoIcon />
+          <AlertDescription>
+            Connected. Select the property you want to track below.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {!isEncryptionConfigured() ? (
+        <Alert variant="warning">
+          <InfoIcon />
+          <AlertDescription>
+            ENCRYPTION_KEY is not configured on this deployment, so OAuth tokens and API keys cannot
+            be stored securely. Set it before connecting any integration.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      <IntegrationsBoard
+        projectId={project.id}
+        searchCards={searchCards}
+        engineCards={engineCards}
+        canWrite={canWrite}
+        hasGoogleAccount={Boolean(connectionByProvider.get("google_search_console"))}
+        selectedSearchConsoleSite={gsc?.site_url ?? null}
+      />
+    </div>
+  );
+}
