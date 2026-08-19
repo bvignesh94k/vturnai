@@ -5,9 +5,9 @@
 A visibility intelligence platform for SEO, AEO, GEO and HEO. V Turn AI crawls a
 website, audits it against search and answer-engine practice, measures whether
 AI answer engines mention, cite and recommend the brand, and turns everything it
-finds into a ranked list of actions.
+finds into a ranked list of actions. 
 
-Production domain: `https://vturnai.com`
+Production domain: `https://vturnai.com
 
 ---
 
