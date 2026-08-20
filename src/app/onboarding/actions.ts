@@ -188,7 +188,16 @@ export async function completeOnboardingAction(
     }
   }
 
-  await enqueueJob({
+  /**
+   * The scan must actually be on the queue before we send anyone to watch it.
+   *
+   * `enqueueJob` reports a failure by returning null, and ignoring that return
+   * is how a misconfigured deployment turns into a progress screen that spins
+   * for ever: the project exists, the page polls, and there is no job behind it
+   * to ever finish. Better to say so here, while the person is still in a
+   * screen that can explain itself.
+   */
+  const job = await enqueueJob({
     jobType: "initial_scan",
     projectId: project.id,
     organizationId,
@@ -197,6 +206,14 @@ export async function completeOnboardingAction(
     priority: 1,
     progressLabel: "Building your visibility profile…",
   });
+
+  if (!job) {
+    log.error("Initial scan could not be queued", { projectId: project.id, organizationId });
+    return {
+      error:
+        "Your workspace was created, but we could not start the first scan. Open the dashboard and start it from there, or contact support if it keeps happening.",
+    };
+  }
 
   revalidatePath("/app");
   redirect(`/onboarding/building?project=${project.id}`);

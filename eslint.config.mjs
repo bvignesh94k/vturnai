@@ -20,6 +20,12 @@ const eslintConfig = defineConfig([
     files: ['src/lib/logger.ts'],
     rules: { 'no-console': 'off' },
   },
+  {
+    // Netlify scheduled functions run outside the app: console is what reaches
+    // the platform's function logs, and there is no logger to reach for.
+    files: ['netlify/functions/**'],
+    rules: { 'no-console': 'off' },
+  },
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "coverage/**"]),
 ]);
 
