@@ -13,6 +13,10 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
   },
+  {
+    key: "Content-Security-Policy",
+    value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://eevtzyhindezesepnyxxr.supabase.co https://*.supabase.co",
+  },
 ];
 
 const nextConfig: NextConfig = {
