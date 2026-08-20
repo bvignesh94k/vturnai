@@ -56,3 +56,7 @@ coverage/
 # Logo design masters. The vector originals and exports that the app actually
 # uses live in public/brand/.
 *.zip
+
+# Generated convenience copy of supabase/migrations/* for pasting into the
+# Supabase SQL Editor. The migrations themselves are the source of truth.
+vturnai-schema.sql
