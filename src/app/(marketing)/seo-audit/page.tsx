@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -119,7 +120,15 @@ export default function SeoAuditPage() {
           </div>
 
           <div id="free-check" className="mt-10 scroll-mt-24">
-            <FreeVisibilityCheck />
+            {/* The check reads the address the hero hands over in `?url=`, so it
+                needs a boundary to keep the rest of this page static. */}
+            <Suspense
+              fallback={
+                <div className="card-elevated h-32 animate-pulse rounded-2xl border bg-card" />
+              }
+            >
+              <FreeVisibilityCheck />
+            </Suspense>
           </div>
         </div>
       </section>

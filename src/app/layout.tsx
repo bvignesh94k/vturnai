@@ -1,12 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Figtree, Geist_Mono, Sora } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SITE, appUrl } from "@/lib/config/site";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], display: "swap" });
+/**
+ * The brand sheet specifies Sora 800 for the wordmark and Figtree 500–600 for
+ * the tagline and interface. Loading the same two faces the logo is drawn in is
+ * what makes the product feel like the mark rather than merely match it.
+ */
+const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"], display: "swap" });
+const sora = Sora({
+  variable: "--font-sora",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  display: "swap",
+});
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
@@ -33,6 +44,9 @@ export const metadata: Metadata = {
   creator: SITE.name,
   publisher: SITE.name,
   alternates: { canonical: "/" },
+  // Icons come from the file conventions next to this file — `icon.svg` and
+  // `apple-icon.tsx` — so they are not re-declared here.
+  manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
     locale: "en_IN",
@@ -56,8 +70,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#16131f" },
+    { media: "(prefers-color-scheme: light)", color: "#fdfdff" },
+    // The brand's dark ground, so the browser chrome matches the page.
+    { media: "(prefers-color-scheme: dark)", color: "#0c0a22" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -65,8 +80,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    // The font variables must land on the root element: `--font-sans` and
+    // `--font-display` are declared on `:root`, and a `var()` inside a custom
+    // property resolves against the element that declares it. Put them on
+    // <body> and those tokens compute to nothing, silently falling back to the
+    // system stack.
+    <html
+      lang="en"
+      className={`${figtree.variable} ${sora.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="antialiased">
         <ThemeProvider>
           <TooltipProvider>
             <a

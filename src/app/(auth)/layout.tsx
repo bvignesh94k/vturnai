@@ -32,7 +32,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Brand side */}
       <div className="relative hidden overflow-hidden border-l lg:block">
         <div className="pointer-events-none absolute inset-0 bg-aurora" aria-hidden="true" />
-        <div className="pointer-events-none absolute inset-0 bg-grid" aria-hidden="true" />
         <div className="relative flex h-full flex-col justify-center px-14 py-16">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
             {SITE.tagline}

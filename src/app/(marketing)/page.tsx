@@ -26,6 +26,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { EngineBadges } from "@/components/marketing/engine-badges";
+import { HeroCheckForm } from "@/components/marketing/hero-check-form";
+import { HeroVisual } from "@/components/marketing/hero-visual";
 import { FeatureCard, JsonLd, Section, SectionHeading } from "@/components/marketing/sections";
 import { DISCIPLINES, SITE } from "@/lib/config/site";
 import { PRO_PLAN } from "@/lib/config/plans";
@@ -39,9 +41,9 @@ import {
 import { formatCurrencyINR } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "See How Visible Your Brand Is Everywhere People Search",
+  title: "Know How Visible Your Brand Is Across Google and AI Search",
   description:
-    "Track your visibility across Google, Bing, ChatGPT, Gemini, Claude, Perplexity, Grok and the next generation of search. V Turn AI turns SEO, AEO and GEO data into a prioritised action list.",
+    "See whether ChatGPT, Gemini, Claude, Perplexity and Grok mention you, cite you, or recommend a competitor — alongside your Google and Bing visibility. V Turn AI scores SEO, AEO, GEO and HEO, then gives you one ranked list of what to fix first.",
   alternates: { canonical: "/" },
 };
 
@@ -153,43 +155,54 @@ export default function HomePage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden border-b">
-        <div className="pointer-events-none absolute inset-0 bg-aurora opacity-70" aria-hidden="true" />
-        <div className="pointer-events-none absolute inset-0 bg-grid" aria-hidden="true" />
-        <div className="relative mx-auto max-w-6xl px-4 py-24 sm:px-6 sm:py-32">
-          <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="soft" className="mb-6 px-3 py-1">
-              <SparklesIcon className="size-3" />
-              SEO · AEO · GEO · HEO in one score
-            </Badge>
+        <div className="pointer-events-none absolute inset-0 bg-aurora" aria-hidden="true" />
+        <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+          <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
+            {/* Copy */}
+            <div className="animate-rise">
+              <Badge variant="soft" className="mb-6 px-3 py-1">
+                <SparklesIcon className="size-3" />
+                SEO · AEO · GEO · HEO in one score
+              </Badge>
 
-            <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl md:text-6xl">
-              See How Visible Your Brand Is{" "}
-              <span className="text-gradient">Everywhere People Search</span>
-            </h1>
+              <h1 className="text-[2.6rem] font-extrabold leading-[1.05] text-balance sm:text-5xl lg:text-[3.5rem]">
+                Know exactly how visible your brand is{" "}
+                <span className="text-gradient">everywhere people search</span>
+              </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground text-pretty">
-              Track your visibility across Google, Bing, ChatGPT, Gemini, Claude, Perplexity, Grok
-              and the next generation of search.
-            </p>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty">
+                Google and Bing are half the story. See whether ChatGPT, Gemini, Claude, Perplexity
+                and Grok mention you, cite you, or recommend a competitor instead — and get one
+                ranked list of what to fix first.
+              </p>
 
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button size="lg" variant="gradient" asChild>
-                <Link href="/signup">
-                  Start 7-Day Free Trial <ArrowRightIcon />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/seo-audit#free-check">Run Free Visibility Check</Link>
-              </Button>
+              <div className="mt-9 max-w-xl">
+                <HeroCheckForm />
+              </div>
+
+              <dl className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+                {[
+                  { value: "6", label: "AI engines tracked" },
+                  { value: "4", label: "Disciplines scored" },
+                  { value: `${formatCurrencyINR(PRO_PLAN.priceMinor)}`, label: "per month, one plan" },
+                ].map((stat) => (
+                  <div key={stat.label} className="flex items-baseline gap-2">
+                    <dt className="font-display text-xl font-extrabold tabular-nums text-primary">
+                      {stat.value}
+                    </dt>
+                    <dd className="text-sm text-muted-foreground">{stat.label}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
 
-            <p className="mt-5 text-sm text-muted-foreground">
-              {formatCurrencyINR(PRO_PLAN.priceMinor)}/month after the trial. Cancel any time.
-            </p>
+            {/* Proof */}
+            <HeroVisual className="animate-rise [animation-delay:120ms] lg:mt-0" />
           </div>
 
-          <div className="mt-16">
-            <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="mt-20">
+            <div className="mx-auto h-px max-w-md rule-brand" aria-hidden="true" />
+            <p className="mt-8 text-center text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Monitoring visibility across
             </p>
             <EngineBadges className="mt-5" />

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon, SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,41 +39,79 @@ const SEVERITY_VARIANT = {
 } as const;
 
 export function FreeVisibilityCheck() {
-  const [url, setUrl] = React.useState("");
+  const searchParams = useSearchParams();
+  const handoffUrl = searchParams.get("url")?.trim() ?? "";
+
+  const [url, setUrl] = React.useState(handoffUrl);
   const [state, setState] = React.useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = React.useState<string | null>(null);
   const [data, setData] = React.useState<QuickCheckResponse["result"] | null>(null);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setState("loading");
-    setError(null);
-    setData(null);
+  /**
+   * `isLive` lets a caller abandon a result it no longer owns — an unmount, or
+   * a second address arriving while the first is still in flight.
+   */
+  const runCheck = React.useCallback(
+    async (target: string, isLive: () => boolean = () => true) => {
+      setState("loading");
+      setError(null);
+      setData(null);
 
-    try {
-      const response = await fetch("/api/public/visibility-check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-      const payload: unknown = await response.json();
+      try {
+        const response = await fetch("/api/public/visibility-check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: target }),
+        });
+        const payload: unknown = await response.json();
+        if (!isLive()) return;
 
-      if (!response.ok) {
-        const message =
-          typeof payload === "object" && payload !== null && "error" in payload
-            ? String((payload as { error: unknown }).error)
-            : "That site could not be analysed.";
-        setError(message);
+        if (!response.ok) {
+          const message =
+            typeof payload === "object" && payload !== null && "error" in payload
+              ? String((payload as { error: unknown }).error)
+              : "That site could not be analysed.";
+          setError(message);
+          setState("error");
+          return;
+        }
+
+        setData((payload as QuickCheckResponse).result);
+        setState("done");
+      } catch {
+        if (!isLive()) return;
+        setError("Something went wrong. Please try again.");
         setState("error");
-        return;
       }
+    },
+    [],
+  );
 
-      setData((payload as QuickCheckResponse).result);
-      setState("done");
-    } catch {
-      setError("Something went wrong. Please try again.");
-      setState("error");
-    }
+  /**
+   * The hero hands an address over in `?url=`. Running it on arrival is the
+   * whole point of asking for it there — the visitor should land on their own
+   * result, not on an input they have to fill in a second time. The field is
+   * seeded from the same value at initialisation, so this only fires the
+   * request, and it does so off the effect body so the render that mounts the
+   * component is not immediately invalidated by a `loading` state.
+   */
+  React.useEffect(() => {
+    if (handoffUrl.length < 4) return;
+
+    let live = true;
+    const started = Promise.resolve().then(() => {
+      if (live) return runCheck(handoffUrl, () => live);
+    });
+    void started;
+
+    return () => {
+      live = false;
+    };
+  }, [handoffUrl, runCheck]);
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void runCheck(url);
   }
 
   return (

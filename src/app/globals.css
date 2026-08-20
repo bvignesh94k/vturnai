@@ -5,108 +5,126 @@
 
 /* ---------------------------------------------------------------------------
    V Turn AI design tokens.
-   Identity: deep indigo/violet primary, electric cyan accent, calm neutral
-   surfaces. Every token is defined for light first, then re-stated for dark.
+
+   The palette is taken directly from the logo, so the product and the mark are
+   the same colour system rather than two that merely coordinate:
+
+     Indigo 800  #3730A3   core brand
+     Violet 600  #7C3AED   generative / AI
+     Cyan 400    #22D3EE   signal, positive change
+     Ink         #15132E   text        · dark ground #0C0A22
+
+   Brand hues are stated as literal hex so they survive every theme, export and
+   embed unchanged. Neutrals are tinted toward the indigo hue so greys never
+   read as cold and unrelated. Every token is defined for light first, then
+   re-stated for dark.
 --------------------------------------------------------------------------- */
 :root {
   --radius: 0.85rem;
 
-  --background: oklch(0.994 0.002 275);
-  --foreground: oklch(0.21 0.03 275);
+  /* Raw brand constants — reference these when a colour must be exact. */
+  --brand-indigo: #3730a3;
+  --brand-violet: #7c3aed;
+  --brand-cyan: #22d3ee;
+  --brand-blue: #3b82f6;
+  --brand-ink: #15132e;
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.03 275);
+  --background: #fdfdff;
+  --foreground: #15132e;
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.03 275);
+  --card: #ffffff;
+  --card-foreground: #15132e;
 
-  --primary: oklch(0.47 0.19 283);
-  --primary-foreground: oklch(0.985 0.005 280);
-  --primary-soft: oklch(0.955 0.025 285);
+  --popover: #ffffff;
+  --popover-foreground: #15132e;
 
-  --secondary: oklch(0.968 0.008 280);
-  --secondary-foreground: oklch(0.3 0.04 280);
+  --primary: #3730a3;
+  --primary-foreground: #ffffff;
+  --primary-soft: #eeefff;
 
-  --muted: oklch(0.968 0.006 280);
-  --muted-foreground: oklch(0.53 0.025 280);
+  --secondary: #f4f5fb;
+  --secondary-foreground: #2a2749;
 
-  --accent: oklch(0.72 0.15 214);
-  --accent-foreground: oklch(0.18 0.04 240);
-  --accent-soft: oklch(0.955 0.035 214);
+  --muted: #f4f5fb;
+  --muted-foreground: #6b6885;
 
-  --destructive: oklch(0.58 0.21 27);
-  --destructive-foreground: oklch(0.985 0.005 280);
+  --accent: #22d3ee;
+  --accent-foreground: #06323d;
+  --accent-soft: #e6fafe;
 
-  --success: oklch(0.62 0.14 158);
-  --warning: oklch(0.74 0.15 75);
-  --info: oklch(0.62 0.14 240);
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
 
-  --border: oklch(0.918 0.008 280);
-  --input: oklch(0.918 0.008 280);
-  --ring: oklch(0.47 0.19 283);
+  --success: #0d9f78;
+  --warning: #d97706;
+  --info: #2563eb;
 
-  --sidebar: oklch(0.985 0.004 280);
-  --sidebar-foreground: oklch(0.28 0.03 280);
-  --sidebar-border: oklch(0.916 0.008 280);
-  --sidebar-accent: oklch(0.955 0.02 285);
-  --sidebar-accent-foreground: oklch(0.33 0.09 283);
+  --border: #e7e8f3;
+  --input: #e0e1f0;
+  --ring: #3730a3;
+
+  --sidebar: #fafaff;
+  --sidebar-foreground: #34314f;
+  --sidebar-border: #e7e8f3;
+  --sidebar-accent: #eeefff;
+  --sidebar-accent-foreground: #3730a3;
 
   /* Data visualisation ramp — brand-anchored, distinguishable in both themes. */
-  --chart-1: oklch(0.52 0.19 283);
-  --chart-2: oklch(0.68 0.14 208);
-  --chart-3: oklch(0.66 0.14 158);
-  --chart-4: oklch(0.74 0.15 75);
-  --chart-5: oklch(0.62 0.19 12);
-  --chart-6: oklch(0.6 0.13 320);
+  --chart-1: #4f46e5;
+  --chart-2: #06b6d4;
+  --chart-3: #7c3aed;
+  --chart-4: #059669;
+  --chart-5: #d97706;
+  --chart-6: #e11d48;
 }
 
 .dark {
-  --background: oklch(0.176 0.021 278);
-  --foreground: oklch(0.955 0.008 280);
+  --background: #0c0a22;
+  --foreground: #edecf7;
 
-  --card: oklch(0.216 0.024 278);
-  --card-foreground: oklch(0.955 0.008 280);
+  --card: #161430;
+  --card-foreground: #edecf7;
 
-  --popover: oklch(0.226 0.024 278);
-  --popover-foreground: oklch(0.955 0.008 280);
+  --popover: #1b1839;
+  --popover-foreground: #edecf7;
 
-  --primary: oklch(0.68 0.16 288);
-  --primary-foreground: oklch(0.16 0.03 280);
-  --primary-soft: oklch(0.28 0.05 285);
+  --primary: #8b7cf6;
+  --primary-foreground: #100e28;
+  --primary-soft: #241f52;
 
-  --secondary: oklch(0.268 0.022 278);
-  --secondary-foreground: oklch(0.94 0.01 280);
+  --secondary: #221f45;
+  --secondary-foreground: #e4e2f3;
 
-  --muted: oklch(0.262 0.02 278);
-  --muted-foreground: oklch(0.71 0.02 280);
+  --muted: #201d40;
+  --muted-foreground: #9d9abb;
 
-  --accent: oklch(0.78 0.13 210);
-  --accent-foreground: oklch(0.17 0.03 240);
-  --accent-soft: oklch(0.29 0.05 214);
+  --accent: #22d3ee;
+  --accent-foreground: #06232b;
+  --accent-soft: #12384a;
 
-  --destructive: oklch(0.66 0.19 25);
-  --destructive-foreground: oklch(0.16 0.03 280);
+  --destructive: #f87171;
+  --destructive-foreground: #2a0a0a;
 
-  --success: oklch(0.7 0.14 158);
-  --warning: oklch(0.8 0.14 78);
-  --info: oklch(0.7 0.13 240);
+  --success: #34d399;
+  --warning: #fbbf24;
+  --info: #60a5fa;
 
-  --border: oklch(0.3 0.02 278);
-  --input: oklch(0.32 0.02 278);
-  --ring: oklch(0.68 0.16 288);
+  --border: #2c2857;
+  --input: #332e63;
+  --ring: #8b7cf6;
 
-  --sidebar: oklch(0.196 0.022 278);
-  --sidebar-foreground: oklch(0.9 0.01 280);
-  --sidebar-border: oklch(0.29 0.02 278);
-  --sidebar-accent: oklch(0.29 0.045 285);
-  --sidebar-accent-foreground: oklch(0.94 0.02 285);
+  --sidebar: #100e2a;
+  --sidebar-foreground: #d9d7ec;
+  --sidebar-border: #2a2653;
+  --sidebar-accent: #241f52;
+  --sidebar-accent-foreground: #c3bcff;
 
-  --chart-1: oklch(0.68 0.16 288);
-  --chart-2: oklch(0.76 0.13 208);
-  --chart-3: oklch(0.74 0.13 158);
-  --chart-4: oklch(0.81 0.14 78);
-  --chart-5: oklch(0.7 0.17 14);
-  --chart-6: oklch(0.71 0.13 320);
+  --chart-1: #8b7cf6;
+  --chart-2: #22d3ee;
+  --chart-3: #c084fc;
+  --chart-4: #34d399;
+  --chart-5: #fbbf24;
+  --chart-6: #fb7185;
 }
 
 @theme inline {
@@ -134,6 +152,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand-indigo: var(--brand-indigo);
+  --color-brand-violet: var(--brand-violet);
+  --color-brand-cyan: var(--brand-cyan);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-border: var(--sidebar-border);
@@ -152,7 +173,9 @@
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 10px);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Figtree carries the interface; Sora carries the wordmark and headlines. */
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-figtree), ui-sans-serif, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
@@ -167,54 +190,103 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-feature-settings: "cv11", "ss01";
-    font-variation-settings: "opsz" 32;
+    /* Stated explicitly rather than relying on Tailwind's default-font chain,
+       so the interface face is never silently the system stack. */
+    font-family: var(--font-sans);
     text-rendering: optimizeLegibility;
+  }
+  /* Headlines take the display face and the wordmark's tighter tracking. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
   }
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
   ::selection {
-    background-color: color-mix(in oklch, var(--primary) 24%, transparent);
+    background-color: color-mix(in oklab, var(--primary) 22%, transparent);
   }
 }
 
 @layer utilities {
-  /* Signature ambient background used behind marketing sections and the
-     onboarding flow. Deliberately low-contrast so text stays readable. */
+  /* Signature ambient wash: the brand triad, bloomed. Deliberately low-contrast
+     so text stays readable, and never a hard-edged pattern — the identity is
+     built from strokes and light, not boxes. */
   .bg-aurora {
     background-image:
-      radial-gradient(60rem 32rem at 12% -8%, color-mix(in oklch, var(--primary) 22%, transparent), transparent 62%),
-      radial-gradient(48rem 28rem at 88% 4%, color-mix(in oklch, var(--accent) 20%, transparent), transparent 60%),
-      radial-gradient(40rem 30rem at 50% 108%, color-mix(in oklch, var(--primary) 12%, transparent), transparent 66%);
+      radial-gradient(58rem 34rem at 8% -12%, color-mix(in oklab, var(--brand-violet) 20%, transparent), transparent 62%),
+      radial-gradient(46rem 30rem at 92% -6%, color-mix(in oklab, var(--brand-cyan) 20%, transparent), transparent 60%),
+      radial-gradient(52rem 32rem at 50% 112%, color-mix(in oklab, var(--brand-indigo) 16%, transparent), transparent 66%);
   }
-  .bg-grid {
+  .dark .bg-aurora {
     background-image:
-      linear-gradient(to right, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px);
-    background-size: 56px 56px;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 55%, transparent 100%);
+      radial-gradient(58rem 34rem at 8% -12%, color-mix(in oklab, var(--brand-violet) 30%, transparent), transparent 62%),
+      radial-gradient(46rem 30rem at 92% -6%, color-mix(in oklab, var(--brand-cyan) 18%, transparent), transparent 60%),
+      radial-gradient(52rem 32rem at 50% 112%, color-mix(in oklab, var(--brand-indigo) 30%, transparent), transparent 66%);
   }
+
+  /* The stroke gradient from the mark, reusable as a fill. */
+  .bg-brand-gradient {
+    background-image: linear-gradient(100deg, var(--brand-cyan) 0%, var(--brand-blue) 34%, var(--brand-indigo) 66%, var(--brand-violet) 100%);
+  }
+
   .text-gradient {
     background-image: linear-gradient(
       100deg,
-      var(--primary) 0%,
-      color-mix(in oklch, var(--primary) 55%, var(--accent)) 55%,
-      var(--accent) 100%
+      var(--brand-indigo) 0%,
+      var(--brand-violet) 48%,
+      var(--brand-cyan) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
+  .dark .text-gradient {
+    background-image: linear-gradient(100deg, #a5b4fc 0%, #c4b5fd 46%, var(--brand-cyan) 100%);
+  }
+
   .card-elevated {
     box-shadow:
-      0 1px 2px color-mix(in oklch, var(--foreground) 5%, transparent),
-      0 8px 24px -12px color-mix(in oklch, var(--foreground) 16%, transparent);
+      0 1px 2px color-mix(in oklab, var(--brand-ink) 5%, transparent),
+      0 8px 24px -12px color-mix(in oklab, var(--brand-ink) 16%, transparent);
   }
+  .dark .card-elevated {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.4),
+      0 8px 24px -12px rgb(0 0 0 / 0.6);
+  }
+
+  /* A hairline lit with the brand gradient — used to close hero sections. */
+  .rule-brand {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklab, var(--brand-violet) 40%, transparent),
+      color-mix(in oklab, var(--brand-cyan) 40%, transparent),
+      transparent
+    );
+  }
+
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+  }
+
+  @keyframes brand-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .animate-rise {
+    animation: brand-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
 

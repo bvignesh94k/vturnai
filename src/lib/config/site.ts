@@ -6,11 +6,32 @@
 
 export const CANONICAL_ORIGIN = "https://vturnai.com";
 
+/**
+ * The origin every canonical, sitemap entry, OG image and JSON-LD `@id` is
+ * built from.
+ *
+ * Order matters. An explicit `NEXT_PUBLIC_APP_URL` always wins, then the host's
+ * own signals, and only a genuine local dev process may fall back to localhost
+ * — a deployed build that guesses `localhost` publishes a whole site of
+ * unreachable canonical URLs, which is worse than guessing the wrong domain.
+ */
 export function appUrl(): string {
   const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
   if (configured) return configured.replace(/\/+$/, "");
+
+  // Vercel.
   if (process.env.VERCEL_ENV === "production") return CANONICAL_ORIGIN;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+
+  // Netlify: `URL` is the project's primary address, `DEPLOY_PRIME_URL` the
+  // per-deploy one used for branch and preview builds.
+  if (process.env.CONTEXT === "production" && process.env.URL) {
+    return process.env.URL.replace(/\/+$/, "");
+  }
+  const netlifyDeployUrl = process.env.DEPLOY_PRIME_URL?.trim() || process.env.URL?.trim();
+  if (netlifyDeployUrl) return netlifyDeployUrl.replace(/\/+$/, "");
+
+  if (process.env.NODE_ENV === "production") return CANONICAL_ORIGIN;
   return "http://localhost:3000";
 }
 

@@ -20,6 +20,19 @@ export function organizationSchema(): Record<string, unknown> {
     description: SITE.longDescription,
     slogan: SITE.tagline,
     email: SITE.contactEmail,
+    // The mark, declared as an ImageObject. Google's knowledge panel and the
+    // answer engines both read `logo` off Organization — an entity without one
+    // gets described without a face.
+    logo: {
+      "@type": "ImageObject",
+      "@id": `${absoluteUrl("/")}#logo`,
+      url: absoluteUrl("/brand/vturnai-icon.png"),
+      contentUrl: absoluteUrl("/brand/vturnai-icon.png"),
+      width: 1024,
+      height: 1024,
+      caption: SITE.name,
+    },
+    image: { "@id": `${absoluteUrl("/")}#logo` },
     foundingDate: "2026",
     areaServed: "Worldwide",
     knowsAbout: [
