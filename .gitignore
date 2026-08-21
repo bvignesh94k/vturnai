@@ -60,3 +60,4 @@ coverage/
 # Generated convenience copy of supabase/migrations/* for pasting into the
 # Supabase SQL Editor. The migrations themselves are the source of truth.
 vturnai-schema.sql
+vturnai-backfill-profiles.sql

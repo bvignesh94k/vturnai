@@ -1,4 +1,12 @@
-import type { Config } from "@netlify/functions";
+
+/**
+ * Netlify reads `config.schedule` from the compiled module. Declaring the shape
+ * locally keeps this file free of a build-time dependency whose own Node
+ * requirement could differ from the build image's.
+ */
+interface ScheduledFunctionConfig {
+  schedule: string;
+}
 
 /**
  * Nightly maintenance — scheduled recrawls, usage rollups and digest
@@ -29,6 +37,6 @@ export default async function handler(): Promise<Response> {
   return new Response(body, { status: 200 });
 }
 
-export const config: Config = {
+export const config: ScheduledFunctionConfig = {
   schedule: "15 2 * * *",
 };
