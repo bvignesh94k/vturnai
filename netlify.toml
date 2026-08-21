@@ -1,5 +1,11 @@
 [build.environment]
   NODE_VERSION = "24"
+  # Razorpay's Key ID is the publishable half of the pair — the checkout modal
+  # cannot open without it in the browser, so NEXT_PUBLIC_RAZORPAY_KEY_ID puts it
+  # in the bundle deliberately. Both names carry the same value, so marking
+  # either as secret makes the scanner flag its own intended output. Exempt the
+  # two by name; every other secret stays scanned.
+  SECRETS_SCAN_OMIT_KEYS = "RAZORPAY_KEY_ID,NEXT_PUBLIC_RAZORPAY_KEY_ID"
 
 [build]
   command = "npm run build"
