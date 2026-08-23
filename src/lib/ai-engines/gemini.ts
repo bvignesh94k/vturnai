@@ -28,7 +28,15 @@ import {
 } from "@/lib/ai-engines/types";
 
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_MODEL = "gemini-2.5-flash";
+/**
+ * Pinned deliberately rather than tracking a `-latest` alias. This product
+ * reports visibility trends over time, and a model that changes underneath a
+ * trend line makes the movement unattributable — a reader cannot tell a real
+ * visibility shift from a model swap. The cost of pinning is that a retired
+ * model must be bumped by hand; Google 404s with the replacement name in the
+ * message, and `GOOGLE_GEMINI_MODEL` overrides this without a deploy meanwhile.
+ */
+const DEFAULT_MODEL = "gemini-3.6-flash";
 
 interface ParsedResponse {
   text: string;
