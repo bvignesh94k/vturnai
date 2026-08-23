@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { appUrl } from "@/lib/config/site";
 
 const log = logger.child("auth-callback");
 
@@ -15,10 +16,11 @@ export const dynamic = "force-dynamic";
  * cannot be used as an open redirect.
  */
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = request.nextUrl;
+  const { searchParams } = request.nextUrl;
   const code = searchParams.get("code");
   const nextParam = searchParams.get("next");
   const errorDescription = searchParams.get("error_description");
+  const origin = appUrl();
 
   const next = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
 
