@@ -3,11 +3,25 @@ import "server-only";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { generatePromptSuggestions } from "@/lib/ai-engines/prompt-suggestions";
 import { rehydrateExtractedPage } from "@/lib/analysis/rehydrate";
+import { getEntitlements } from "@/lib/billing/entitlements";
+import { getConfiguredEngineIds } from "@/lib/ai-engines/registry";
 import { completeJob, enqueueJob, payloadValue, updateJobProgress } from "@/lib/jobs/queue";
 import { logger } from "@/lib/logger";
 import type { CrawlPageRow, JobRow, PromptGroupDb } from "@/lib/db/types";
 
 const log = logger.child("initial-scan-job");
+
+/**
+ * How many suggestions a brand-new project starts with switched on.
+ *
+ * Deliberately small: five prompts is a rounding error against the plan's
+ * monthly execution quota, but it is the difference between a first dashboard
+ * that reports a real mention rate and one that reports em dashes. A user who
+ * has never seen the product cannot judge it from an empty grid, and asking
+ * them to hand-pick prompts before anything works puts the homework before the
+ * value.
+ */
+const STARTER_PROMPT_COUNT = 5;
 
 /**
  * Initial scan orchestration.
@@ -157,9 +171,87 @@ async function generateSuggestedPrompts(job: JobRow, projectId: string): Promise
     if (error) log.warn("Some prompt suggestions could not be stored", { projectId, error });
   }
 
+  // Only ever on a project's very first suggestion run. Keying off "the project
+  // had no prompts at all beforehand" means a user who reviews their list and
+  // deliberately switches everything off never has that decision undone by a
+  // later re-scan.
+  const activated =
+    (existingCount ?? 0) === 0
+      ? await activateStarterPrompts({ projectId, organizationId: project.organization_id })
+      : 0;
+
   await completeJob({
     jobId: job.id,
-    label: `${rows.length} prompt suggestions ready`,
-    result: { suggested: rows.length, existing: existingCount ?? 0 },
+    label:
+      activated > 0
+        ? `${rows.length} prompts ready, ${activated} tracking now`
+        : `${rows.length} prompt suggestions ready`,
+    result: { suggested: rows.length, existing: existingCount ?? 0, activated },
   });
+}
+
+/**
+ * Switch on the highest-priority suggestions for a new project and measure them
+ * straight away, so the first dashboard the user opens contains real numbers
+ * about their own brand.
+ *
+ * Everything here degrades quietly: no configured engine, an inactive plan or a
+ * failed update all just mean fewer starter prompts, never a failed scan. The
+ * suggestions are still written either way and the user can activate them by
+ * hand, which is exactly the behaviour this had before.
+ */
+async function activateStarterPrompts(input: {
+  projectId: string;
+  organizationId: string;
+}): Promise<number> {
+  const supabase = createServiceRoleClient();
+
+  const entitlements = await getEntitlements(input.organizationId);
+  if (!entitlements.isActive || !entitlements.features.aiVisibility) return 0;
+
+  const limit = Math.min(STARTER_PROMPT_COUNT, entitlements.limits.activePrompts);
+  if (limit <= 0) return 0;
+
+  // Lower `priority` ranks higher — see the sort in generatePromptSuggestions.
+  const { data: candidates } = await supabase
+    .from("prompts")
+    .select("id")
+    .eq("project_id", input.projectId)
+    .eq("is_active", false)
+    .order("priority", { ascending: true })
+    .order("created_at", { ascending: true })
+    .limit(limit);
+
+  const promptIds = (candidates ?? []).map((row) => row.id);
+  if (promptIds.length === 0) return 0;
+
+  const { error } = await supabase.from("prompts").update({ is_active: true }).in("id", promptIds);
+  if (error) {
+    log.warn("Could not activate starter prompts", { projectId: input.projectId, error });
+    return 0;
+  }
+
+  // No engine key configured means a scan would only record failures, so leave
+  // the prompts active and let the user trigger one once a provider is added.
+  if (getConfiguredEngineIds().length === 0) {
+    log.info("Starter prompts activated but no AI engine is configured", {
+      projectId: input.projectId,
+      activated: promptIds.length,
+    });
+    return promptIds.length;
+  }
+
+  // The scan reads the active prompt list itself, so it picks up exactly the
+  // rows just switched on. `initial_scan` also keeps this out of the monthly
+  // manual-scan allowance, which the user has not chosen to spend.
+  await enqueueJob({
+    jobType: "ai_visibility_scan",
+    projectId: input.projectId,
+    organizationId: input.organizationId,
+    payload: { triggerSource: "initial_scan" },
+    idempotencyKey: `initial_ai_scan:${input.projectId}`,
+    priority: 8,
+  });
+
+  return promptIds.length;
 }

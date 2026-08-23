@@ -9,6 +9,7 @@ import {
   TriangleAlertIcon,
 } from "lucide-react";
 import { ActionButton } from "@/components/app/action-button";
+import { AiActivationCard } from "@/components/app/ai-activation-card";
 import { EngineGrid } from "@/components/app/engine-grid";
 import { MetricCard } from "@/components/app/metric-card";
 import { PageHeader } from "@/components/app/page-header";
@@ -49,7 +50,15 @@ export default async function OverviewPage({
   const { project, entitlements, canWrite } = await loadPageContext(searchParams);
 
   const supabase = await createServerSupabaseClient();
-  const [scores, aiData, search, trend, activity, { data: topOpportunities }] = await Promise.all([
+  const [
+    scores,
+    aiData,
+    search,
+    trend,
+    activity,
+    { data: topOpportunities },
+    { data: promptSuggestions },
+  ] = await Promise.all([
     loadScoreSnapshot(project.id),
     loadAiVisibility({ projectId: project.id, brandName: project.brand_name }),
     loadSearchSnapshot(project.id),
@@ -62,11 +71,24 @@ export default async function OverviewPage({
       .eq("status", "open")
       .order("priority_score", { ascending: false })
       .limit(5),
+    // Quoted back to the user in the AI activation card, so the invitation to
+    // activate prompts shows their own questions rather than an abstraction.
+    supabase
+      .from("prompts")
+      .select("prompt_text")
+      .eq("project_id", project.id)
+      .eq("is_active", false)
+      .order("priority", { ascending: true })
+      .limit(3),
   ]);
 
   const hasScanned = scores.vScore !== null;
   const hasAiData = aiData.summary !== null;
   const opportunities = topOpportunities ?? [];
+  const suggestedPrompts = (promptSuggestions ?? []).map((row) => row.prompt_text);
+  const configuredEngineNames = aiData.providerStatuses
+    .filter((status) => status.configured)
+    .map((status) => status.name);
 
   return (
     <div className="space-y-6">
@@ -144,63 +166,76 @@ export default async function OverviewPage({
           <ScoreCards snapshot={scores} />
 
           {/* Where am I visible? */}
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <MetricCard
-              metricKey="aiShareOfVoice"
-              value={aiData.summary?.shareOfVoice ?? null}
-              format="percent"
-              delta={
-                aiData.summary && aiData.previousSummary
-                  ? round(aiData.summary.shareOfVoice - aiData.previousSummary.shareOfVoice, 1)
-                  : null
-              }
-              emptyHint="Run an AI scan with competitors to measure"
+          {!hasAiData ? (
+            <AiActivationCard
+              brandName={project.brand_name}
+              vScore={scores.vScore}
+              suggestedPrompts={suggestedPrompts}
+              trackedPrompts={aiData.trackedPrompts}
+              engineNames={configuredEngineNames}
+              projectId={project.id}
+              canWrite={canWrite}
+              scanInProgress={Boolean(activity.activeJob)}
             />
-            <MetricCard
-              metricKey="brandMentionRate"
-              value={aiData.summary?.mentionRate ?? null}
-              format="percent"
-              delta={
-                aiData.summary && aiData.previousSummary
-                  ? round(aiData.summary.mentionRate - aiData.previousSummary.mentionRate, 1)
-                  : null
-              }
-              emptyHint="No AI visibility data yet"
-            />
-            <MetricCard
-              metricKey="citationRate"
-              value={aiData.summary?.citationRate ?? null}
-              format="percent"
-              delta={
-                aiData.summary && aiData.previousSummary
-                  ? round(aiData.summary.citationRate - aiData.previousSummary.citationRate, 1)
-                  : null
-              }
-              emptyHint="No AI visibility data yet"
-            />
-            <MetricCard
-              metricKey="recommendationRate"
-              value={aiData.summary?.recommendationRate ?? null}
-              format="percent"
-              delta={
-                aiData.summary && aiData.previousSummary
-                  ? round(
-                      aiData.summary.recommendationRate - aiData.previousSummary.recommendationRate,
-                      1,
-                    )
-                  : null
-              }
-              emptyHint="No AI visibility data yet"
-            />
-            <MetricCard
-              metricKey="citationReadiness"
-              label="Prompt coverage"
-              value={aiData.summary?.promptCoverage ?? null}
-              format="percent"
-              emptyHint="No AI visibility data yet"
-              footnote={`${aiData.trackedPrompts} prompts active`}
-            />
-          </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+              <MetricCard
+                metricKey="aiShareOfVoice"
+                value={aiData.summary?.shareOfVoice ?? null}
+                format="percent"
+                delta={
+                  aiData.summary && aiData.previousSummary
+                    ? round(aiData.summary.shareOfVoice - aiData.previousSummary.shareOfVoice, 1)
+                    : null
+                }
+                emptyHint="You do not yet know your share of AI answers"
+              />
+              <MetricCard
+                metricKey="brandMentionRate"
+                value={aiData.summary?.mentionRate ?? null}
+                format="percent"
+                delta={
+                  aiData.summary && aiData.previousSummary
+                    ? round(aiData.summary.mentionRate - aiData.previousSummary.mentionRate, 1)
+                    : null
+                }
+                emptyHint="You do not yet know if AI engines mention you"
+              />
+              <MetricCard
+                metricKey="citationRate"
+                value={aiData.summary?.citationRate ?? null}
+                format="percent"
+                delta={
+                  aiData.summary && aiData.previousSummary
+                    ? round(aiData.summary.citationRate - aiData.previousSummary.citationRate, 1)
+                    : null
+                }
+                emptyHint="You do not yet know if AI engines cite your pages"
+              />
+              <MetricCard
+                metricKey="recommendationRate"
+                value={aiData.summary?.recommendationRate ?? null}
+                format="percent"
+                delta={
+                  aiData.summary && aiData.previousSummary
+                    ? round(
+                        aiData.summary.recommendationRate - aiData.previousSummary.recommendationRate,
+                        1,
+                      )
+                    : null
+                }
+                emptyHint="You do not yet know if AI engines recommend you"
+              />
+              <MetricCard
+                metricKey="citationReadiness"
+                label="Prompt coverage"
+                value={aiData.summary?.promptCoverage ?? null}
+                format="percent"
+                emptyHint="No prompts have been measured yet"
+                footnote={`${aiData.trackedPrompts} prompts active`}
+              />
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard
@@ -219,13 +254,13 @@ export default async function OverviewPage({
               metricKey="googleClicks"
               value={search.connected ? search.clicks : null}
               delta={search.deltas.clicks}
-              emptyHint="Connect Google Search Console"
+              emptyHint="Connect Search Console to see what Google sends you"
             />
             <MetricCard
               metricKey="googleImpressions"
               value={search.connected ? search.impressions : null}
               delta={search.deltas.impressions}
-              emptyHint="Connect Google Search Console"
+              emptyHint="Connect Search Console to see where you appear"
             />
             <MetricCard
               metricKey="averagePosition"
@@ -233,7 +268,7 @@ export default async function OverviewPage({
               format="raw"
               delta={search.deltas.position}
               deltaDirection="higher-is-better"
-              emptyHint="Connect Google Search Console"
+              emptyHint="Connect Search Console to see where you rank"
               footnote="Lower is better"
             />
           </div>
