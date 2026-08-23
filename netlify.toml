@@ -1,6 +1,10 @@
 [build.environment]
   NODE_VERSION = "24"
 
+  # Application base URL for email verification links, redirects, and canonical URLs.
+  # Must match your Netlify domain or custom domain.
+  NEXT_PUBLIC_APP_URL = "https://vturnai.netlify.app"
+
   # Razorpay's Key ID is the publishable half of the pair — the checkout modal
   # cannot open without it in the browser, so NEXT_PUBLIC_RAZORPAY_KEY_ID puts it
   # in the bundle deliberately. Both names carry the same value, so scanning
