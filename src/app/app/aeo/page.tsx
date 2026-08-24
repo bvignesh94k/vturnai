@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ExternalLinkIcon, QuoteIcon } from "lucide-react";
+import { FactorFixList } from "@/components/app/factor-fix-list";
 import { MetricCard } from "@/components/app/metric-card";
 import { PageHeader } from "@/components/app/page-header";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
@@ -13,7 +14,7 @@ import { SUGGESTION_GROUP_LABELS } from "@/lib/analysis/types";
 import { IDEAL_ANSWER_MAX_WORDS, IDEAL_ANSWER_MIN_WORDS } from "@/lib/analysis/aeo";
 import { loadPageContext } from "@/lib/data/project-context";
 import { loadProjectActivity, loadScoreSnapshot } from "@/lib/data/dashboard";
-import { averageComponents, loadPageAnalysis } from "@/lib/data/page-analysis";
+import { averageComponents, factorFixes, loadPageAnalysis } from "@/lib/data/page-analysis";
 import { round, truncate, unique } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "AEO Analyzer" };
@@ -47,7 +48,7 @@ export default async function AeoPage({
     .map((entry) => JSON.parse(entry) as { group: string; title: string; detail: string; example?: string })
     .slice(0, 8);
 
-  const weakest = components.filter((component) => component.score < 55).slice(0, 4);
+  const fixes = factorFixes(pages, (row) => row.aeoComponents, { limit: 4 });
 
   if (pages.length === 0) {
     return (
@@ -108,31 +109,7 @@ export default async function AeoPage({
         />
 
         <div className="space-y-4">
-          {weakest.length > 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Fix these first</CardTitle>
-                <CardDescription>
-                  The lowest-scoring factors, ordered by how much they cost you.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 pt-0">
-                {weakest.map((component) => (
-                  <div key={component.key} className="rounded-lg border bg-secondary/40 p-3.5">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <p className="text-sm font-medium">{component.label}</p>
-                      <Badge variant={component.score < 30 ? "destructive" : "warning"}>
-                        {round(component.score, 0)}
-                      </Badge>
-                    </div>
-                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
-                      {component.description}
-                    </p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          ) : null}
+          <FactorFixList fixes={fixes} currentScore={scores.aeo ?? 0} discipline="AEO" />
 
           {suggestions.length > 0 ? (
             <Card>

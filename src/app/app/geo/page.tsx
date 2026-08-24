@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AlertTriangleIcon, ExternalLinkIcon, SparklesIcon } from "lucide-react";
+import { FactorFixList } from "@/components/app/factor-fix-list";
 import { MetricCard } from "@/components/app/metric-card";
 import { PageHeader } from "@/components/app/page-header";
 import { ScoreBreakdown } from "@/components/app/score-breakdown";
@@ -14,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { METRIC_EXPLANATIONS } from "@/lib/config/metric-explanations";
 import { loadPageContext } from "@/lib/data/project-context";
 import { loadProjectActivity, loadScoreSnapshot } from "@/lib/data/dashboard";
-import { averageComponents, loadPageAnalysis } from "@/lib/data/page-analysis";
+import { averageComponents, factorFixes, loadPageAnalysis } from "@/lib/data/page-analysis";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { round, truncate } from "@/lib/utils";
 
@@ -53,6 +54,7 @@ export default async function GeoPage({
   });
 
   const components = averageComponents(pages, (row) => row.geoComponents);
+  const geoFixes = factorFixes(pages, (row) => row.geoComponents, { limit: 4 });
   const citationComponents = averageComponents(pages, (row) => row.citationComponents);
   const blockedCrawlers = activity.latestCrawl?.ai_crawlers_blocked ?? [];
 
@@ -189,6 +191,8 @@ export default async function GeoPage({
           </CardContent>
         </Card>
       ) : null}
+
+      <FactorFixList fixes={geoFixes} currentScore={scores.geo ?? 0} discipline="GEO" />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <ScoreBreakdown

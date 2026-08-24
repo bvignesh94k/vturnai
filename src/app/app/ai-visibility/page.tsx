@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BotIcon, ExternalLinkIcon, InfoIcon, PlayIcon } from "lucide-react";
+import { ExternalLinkIcon, InfoIcon, PlayIcon } from "lucide-react";
 import { ActionButton } from "@/components/app/action-button";
+import { AiActivationChecklist } from "@/components/app/ai-activation";
 import { EngineGrid } from "@/components/app/engine-grid";
 import { MetricCard } from "@/components/app/metric-card";
 import { PageHeader } from "@/components/app/page-header";
@@ -10,7 +11,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { startAiScanAction } from "@/app/app/actions";
 import { ENGINES, OBSERVATION_MODES, type EngineId } from "@/lib/config/engines";
@@ -37,9 +37,16 @@ export default async function AiVisibilityPage({
   const { project, canWrite } = await loadPageContext(searchParams);
   const supabase = await createServerSupabaseClient();
 
-  const [aiData, trend, { data: recentRuns }, { data: topCitations }] = await Promise.all([
+  const [aiData, trend, { count: suggestedPrompts }, { data: recentRuns }, { data: topCitations }] =
+    await Promise.all([
     loadAiVisibility({ projectId: project.id, brandName: project.brand_name }),
     loadScoreTrend(project.id),
+    supabase
+      .from("prompts")
+      .select("id", { count: "exact", head: true })
+      .eq("project_id", project.id)
+      .eq("is_suggested", true)
+      .eq("is_active", false),
     supabase
       .from("ai_runs")
       .select(
@@ -88,26 +95,12 @@ export default async function AiVisibilityPage({
       />
 
       {aiData.summary === null ? (
-        <EmptyState
-          icon={<BotIcon className="size-5" />}
-          title="No AI visibility data yet."
-          description="Run your first AI visibility scan to see whether ChatGPT, Gemini, Claude, Perplexity and Grok mention or cite your brand."
-          action={
-            canWrite ? (
-              <ActionButton
-                action={startAiScanAction}
-                fields={{ projectId: project.id }}
-                variant="gradient"
-              >
-                <PlayIcon /> Run AI Visibility Scan
-              </ActionButton>
-            ) : null
-          }
-          secondaryAction={
-            <Button variant="outline" asChild>
-              <Link href="/app/prompts">Set up prompts first</Link>
-            </Button>
-          }
+        <AiActivationChecklist
+          projectId={project.id}
+          canWrite={canWrite}
+          providerStatuses={aiData.providerStatuses}
+          activePrompts={aiData.trackedPrompts}
+          suggestedPrompts={suggestedPrompts ?? 0}
         />
       ) : (
         <>
@@ -305,7 +298,9 @@ export default async function AiVisibilityPage({
         </>
       )}
 
-      {unconfigured.length > 0 ? (
+      {/* The activation checklist already leads with connection state, so this
+          alert is only for an account that has data and a gap in coverage. */}
+      {unconfigured.length > 0 && aiData.summary !== null ? (
         <Alert variant="info">
           <InfoIcon />
           <AlertTitle>
