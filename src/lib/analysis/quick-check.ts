@@ -1,11 +1,13 @@
 import "server-only";
 
+import { generatePromptSuggestions } from "@/lib/ai-engines/prompt-suggestions";
 import { analysePageAeo } from "@/lib/analysis/aeo";
 import { analysePageGeo } from "@/lib/analysis/geo";
 import { analyseCitationReadiness } from "@/lib/analysis/citation-readiness";
 import { extractPage } from "@/lib/crawler/extractor";
 import { fetchRobotsTxt, detectBlockedAiCrawlers } from "@/lib/crawler/robots";
 import { safeFetch } from "@/lib/crawler/fetcher";
+import { toRegistrableHost } from "@/lib/crawler/url";
 import { composeHeoScore, composeSeoScore } from "@/lib/metrics/scores";
 import { bandScore, booleanScore, passRateScore } from "@/lib/metrics/scores";
 import { round } from "@/lib/utils";
@@ -47,7 +49,79 @@ export interface QuickCheckResult {
     aiCrawlersBlocked: Array<{ agent: string; engine: string }>;
   };
   topFindings: Array<{ title: string; detail: string; severity: "critical" | "high" | "medium" | "low" }>;
+  /**
+   * Neutral category questions we would put to the answer engines on this
+   * brand's behalf. Generated, never executed — see `runQuickCheck`.
+   */
+  aiPrompts: string[];
   suggestions: AnalysisSuggestion[];
+}
+
+/**
+ * ccTLD to country code. Used only to decide whether a country-specific prompt
+ * can be shown honestly: a generic TLD says nothing about where a business
+ * sells, so those prompts are dropped rather than guessed at.
+ */
+const CC_TLD_COUNTRIES: Record<string, string> = {
+  in: "IN", uk: "GB", au: "AU", ca: "CA", sg: "SG", ae: "AE", us: "US",
+  de: "DE", fr: "FR", nl: "NL", es: "ES", it: "IT", jp: "JP", br: "BR",
+};
+
+/** Resolves to no real country, so prompts that use it are recognisable. */
+const UNKNOWN_COUNTRY = "ZZ";
+
+function countryFromHost(host: string | null): string | null {
+  if (!host) return null;
+  return CC_TLD_COUNTRIES[host.split(".").pop() ?? ""] ?? null;
+}
+
+/** "stripe.com" gives "Stripe" — a seed for generation, never shown to anyone. */
+function brandSeedFromHost(host: string | null): string {
+  if (!host) return "this brand";
+  const label = host.split(".")[0] ?? host;
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+/**
+ * A short category phrase for prompt generation, read from the title tag.
+ *
+ * Left to itself the generator falls back to the first H2, which on a marketing
+ * homepage is a slogan — Stripe's produced "Who provides the backbone of global
+ * commerce?", a question no buyer has ever typed. The title is the one element
+ * almost every site uses to say what it actually sells, so we take the longest
+ * brand-separated segment, cut it at the first connective, and keep the head
+ * noun phrase. Returns null when nothing usable survives, which puts the
+ * generator back on its own fallback rather than inventing a category.
+ */
+const TITLE_CONNECTIVES = /\b(to|that|for|with|and|which|where|helping|built|made)\b/i;
+
+export function categoryFromPage(title: string | null): string | null {
+  if (!title) return null;
+
+  const segment = title
+    .split(/[|·—–:]/)
+    .map((part) => part.trim())
+    .filter((part) => part.split(/\s+/).length > 1)
+    .sort((a, b) => b.length - a.length)[0];
+  if (!segment) return null;
+
+  const head = segment.split(TITLE_CONNECTIVES)[0] ?? segment;
+  const ARTICLES = new Set(["the", "a", "an", "your", "our"]);
+  const words = head
+    .replace(/[^\p{L}\p{N}\s&+-]/gu, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim()
+    .split(" ")
+    .slice(0, 5);
+  // "The AI workspace" would otherwise become "Which the ai workspace should…".
+  while (words.length > 1 && ARTICLES.has(words[0].toLowerCase())) words.shift();
+  words.splice(4);
+
+  const phrase = words.join(" ");
+  if (phrase.length < 6 || phrase.length > 42) return null;
+  // Guard against a segment that is only filler, which would read as nonsense.
+  if (!words.some((word) => word.length > 3)) return null;
+  return phrase.toLowerCase();
 }
 
 export async function runQuickCheck(siteUrl: string): Promise<QuickCheckResult> {
@@ -174,6 +248,53 @@ export async function runQuickCheck(siteUrl: string): Promise<QuickCheckResult> 
     });
   }
 
+  // The question a visitor actually arrived with is "does ChatGPT name me when
+  // someone asks for this?" — so the check ends by showing the exact questions
+  // we would ask on their behalf. `generatePromptSuggestions` is pure and
+  // synchronous, so this costs no API call and cannot be abused for spend on an
+  // unauthenticated endpoint. The answers are what a trial buys.
+  const host = toRegistrableHost(response.finalUrl);
+  const brandSeed = brandSeedFromHost(host);
+  const inferredCountry = countryFromHost(host);
+  const aiPrompts = generatePromptSuggestions({
+    brandName: brandSeed,
+    businessCategory: categoryFromPage(page.title),
+    businessDescription: page.metaDescription,
+    // A country we merely guessed from a generic TLD would put a false claim in
+    // front of the visitor, so instead of guessing we pass a code that resolves
+    // to no real country and drop every prompt that echoes it back.
+    targetCountry: inferredCountry ?? UNKNOWN_COUNTRY,
+    targetAudience: null,
+    competitors: [],
+    pages: [page],
+  })
+    // Only two sources are trustworthy from a single page. The category
+    // templates, which are built from the title we resolved above, and question
+    // headings, which the page already poses in the visitor's own words. The
+    // "services" source reads H2s, and on a marketing homepage those are
+    // slogans — it produced "Who provides the backbone of global commerce?",
+    // a question no buyer has ever typed.
+    .filter((suggestion) => {
+      if (suggestion.source === "business_description") return true;
+      // A heading only earns a place if it is genuinely a question. The
+      // extractor is lenient enough to pass fragments like "What's happening",
+      // which reads as a bug when quoted back as something a buyer would ask.
+      return (
+        suggestion.source === "headings" &&
+        suggestion.promptText.trim().endsWith("?") &&
+        suggestion.promptText.trim().length >= 20
+      );
+    })
+    .map((suggestion) => suggestion.promptText)
+    // A brand name inferred from the domain label is the other thing worth
+    // dropping — "Vturnu" for vturnu.com reads as a typo of the visitor's own
+    // name. What survives is the category questions, which are the ones that
+    // make the point anyway: they never name you, so whether you show up in the
+    // answer is the actual measurement.
+    .filter((text) => inferredCountry !== null || !text.includes(UNKNOWN_COUNTRY))
+    .filter((text) => !text.includes(brandSeed))
+    .slice(0, 4);
+
   return {
     url: siteUrl,
     finalUrl: response.finalUrl,
@@ -204,6 +325,7 @@ export async function runQuickCheck(siteUrl: string): Promise<QuickCheckResult> 
       aiCrawlersBlocked: blocked.map((entry) => ({ agent: entry.agent, engine: entry.engine })),
     },
     topFindings: findings.slice(0, 6),
+    aiPrompts,
     suggestions: [...aeo.suggestions, ...geo.suggestions].slice(0, 6),
   };
 }

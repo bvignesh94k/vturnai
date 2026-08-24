@@ -3,12 +3,20 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon, SearchIcon } from "lucide-react";
+import {
+  AlertCircleIcon,
+  BotIcon,
+  CheckCircle2Icon,
+  Loader2Icon,
+  LockIcon,
+  SearchIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScoreRing } from "@/components/app/score-ring";
+import { PRO_PLAN } from "@/lib/config/plans";
 import { cn, formatDateTime } from "@/lib/utils";
 
 interface QuickCheckResponse {
@@ -28,6 +36,7 @@ interface QuickCheckResponse {
       aiCrawlersBlocked: Array<{ agent: string; engine: string }>;
     };
     topFindings: Array<{ title: string; detail: string; severity: "critical" | "high" | "medium" | "low" }>;
+    aiPrompts: string[];
   };
 }
 
@@ -216,20 +225,85 @@ export function FreeVisibilityCheck() {
             </Alert>
           )}
 
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-dashed p-5">
-            <div className="flex-1">
-              <p className="text-sm font-semibold">This is one page. Your site has more.</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                A trial crawls up to 500 URLs, tracks 25 AI prompts across five engines, and builds
-                your ranked action list.
-              </p>
+          {/*
+            * The scores above answer "is my page well built?" — but the visitor
+            * arrived asking "does AI mention me?". These are the real questions
+            * generated from their own page, shown unanswered on purpose: the
+            * gap between seeing the question and knowing the answer is the
+            * reason to start a trial, and it costs us no API call to show.
+            */}
+          {data.aiPrompts.length > 0 ? (
+            <div className="rounded-xl border bg-card p-5 sm:p-6">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                  <BotIcon className="size-[18px]" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-semibold leading-snug">
+                    Your buyers are asking AI these questions right now
+                  </h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    Generated from your own homepage. Notice that none of them name you — that is
+                    the point. Whether you appear in the answer is the measurement.
+                  </p>
+                </div>
+              </div>
+
+              <ul className="mt-5 space-y-2.5">
+                {data.aiPrompts.map((prompt) => (
+                  <li
+                    key={prompt}
+                    className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border bg-secondary/40 px-4 py-3"
+                  >
+                    <p className="min-w-0 flex-1 text-sm font-medium">
+                      <span className="text-primary">&ldquo;</span>
+                      {prompt}
+                      <span className="text-primary">&rdquo;</span>
+                    </p>
+                    <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                      <LockIcon className="size-3.5" aria-hidden="true" />
+                      Answer hidden
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-5 flex flex-wrap items-center gap-3 border-t pt-5">
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">
+                    See who ChatGPT, Claude and Gemini actually name.
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    A trial asks these questions for real, crawls up to{" "}
+                    {PRO_PLAN.limits.crawledUrls} URLs and tracks{" "}
+                    {PRO_PLAN.limits.activePrompts} prompts — so you find out whether it is you or a
+                    competitor being recommended.
+                  </p>
+                </div>
+                <Button variant="gradient" asChild>
+                  <Link href={`/signup?site=${encodeURIComponent(data.finalUrl)}`}>
+                    Reveal the answers &mdash; free trial
+                  </Link>
+                </Button>
+              </div>
             </div>
-            <Button variant="gradient" asChild>
-              <Link href={`/signup?site=${encodeURIComponent(data.finalUrl)}`}>
-                Start 7-Day Free Trial
-              </Link>
-            </Button>
-          </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border border-dashed p-5">
+              <div className="flex-1">
+                <p className="text-sm font-semibold">This is one page. Your site has more.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  A trial crawls up to {PRO_PLAN.limits.crawledUrls} URLs, tracks{" "}
+                  {PRO_PLAN.limits.activePrompts} AI prompts across the engines, and builds your
+                  ranked action list.
+                </p>
+              </div>
+              <Button variant="gradient" asChild>
+                <Link href={`/signup?site=${encodeURIComponent(data.finalUrl)}`}>
+                  Start 7-Day Free Trial
+                </Link>
+              </Button>
+            </div>
+          )}
 
           <p className={cn("text-xs text-muted-foreground")}>
             Signals detected: {data.signals.wordCount.toLocaleString("en-IN")} words,{" "}
