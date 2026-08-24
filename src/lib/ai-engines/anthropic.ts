@@ -1,5 +1,5 @@
 /**
- * Anthropic adapter — the Messages API with the web search tool.
+ * Anthropic adapter, the Messages API with the web search tool.
  *
  * Sources arrive in two shapes: `web_search_tool_result` blocks listing the
  * pages searched, and inline `citations` attached to text blocks marking what

@@ -35,7 +35,7 @@ export const METRIC_EXPLANATIONS = {
     howCalculated:
       "Weighted from indexability, titles and descriptions, heading structure, content depth, internal linking, image hygiene and page performance, measured across every page in your last crawl.",
     howToImprove:
-      "Clear the Critical and High issues in Website Audit first — missing titles, blocked pages and broken links cost the most.",
+      "Clear the Critical and High issues in Website Audit first: missing titles, blocked pages and broken links cost the most.",
   },
   aeoScore: {
     label: "AEO Score",
@@ -62,7 +62,7 @@ export const METRIC_EXPLANATIONS = {
   heoScore: {
     label: "HEO Score",
     whatItMeans:
-      "Hybrid Engine Optimization — your combined readiness across classic search, answer engines and generative engines.",
+      "Hybrid Engine Optimization: your combined readiness across classic search, answer engines and generative engines.",
     whyItMatters:
       "People move between Google, ChatGPT and Perplexity in a single decision. Being strong in only one of them leaks demand.",
     howCalculated:
@@ -106,7 +106,7 @@ export const METRIC_EXPLANATIONS = {
     label: "Citation Rate",
     whatItMeans: "How often AI engines link to your domain as a source in their answers.",
     whyItMatters:
-      "Citations are the AI equivalent of a ranking position — they send real visitors and prove the engine trusts the page.",
+      "Citations are the AI equivalent of a ranking position: they send real visitors and prove the engine trusts the page.",
     howCalculated:
       "Valid AI responses citing at least one URL on your domain, divided by all valid AI responses. Only engines that return source lists contribute.",
     howToImprove:
@@ -139,7 +139,7 @@ export const METRIC_EXPLANATIONS = {
     whyItMatters:
       "Appearing on one engine and nowhere else usually means a source-coverage gap rather than a content-quality problem.",
     howCalculated:
-      "For each prompt, engines mentioning your brand divided by engines that returned a valid answer — then averaged across prompts.",
+      "For each prompt, engines mentioning your brand divided by engines that returned a valid answer, then averaged across prompts.",
     howToImprove:
       "Engines draw on different sources. Strengthen your presence on the third-party sites and directories the engines you are missing tend to cite.",
   },
@@ -150,7 +150,7 @@ export const METRIC_EXPLANATIONS = {
       "If everything depends on one page, one algorithm change can erase your AI visibility overnight.",
     howCalculated: "The count of distinct URLs on your domain cited across all AI runs in the period.",
     howToImprove:
-      "Build citation-worthy depth beyond the homepage — guides, data pages and comparisons each earn their own citations.",
+      "Build citation-worthy depth beyond the homepage: guides, data pages and comparisons each earn their own citations.",
   },
   trackedPrompts: {
     label: "Tracked Prompts",
@@ -176,7 +176,7 @@ export const METRIC_EXPLANATIONS = {
     whyItMatters: "It is the clearest measure of demand you are actually capturing from classic search.",
     howCalculated: "Summed from Google Search Console performance data for your verified property.",
     howToImprove:
-      "Improve titles and descriptions on pages with many impressions but few clicks — Opportunities flags these automatically.",
+      "Improve titles and descriptions on pages with many impressions but few clicks. Opportunities flags these automatically.",
   },
   googleImpressions: {
     label: "Google Impressions",
@@ -203,7 +203,7 @@ export const METRIC_EXPLANATIONS = {
     label: "Citation Readiness",
     whatItMeans: "How likely a specific page is to be quoted or linked by an AI engine.",
     whyItMatters:
-      "Pages score badly here for fixable reasons — no facts to quote, no author, no date, nothing unique.",
+      "Pages score badly here for fixable reasons: no facts to quote, no author, no date, nothing unique.",
     howCalculated:
       "Weighted from factual statements, unique information, statistics, sources, author, updated date, definitions, tables, FAQs, structured data and evidence of first-hand expertise.",
     howToImprove:
@@ -214,7 +214,7 @@ export const METRIC_EXPLANATIONS = {
     whatItMeans:
       "Whether your site tells the same story about your company on every page.",
     whyItMatters:
-      "Contradictions — two founding years, two addresses — make AI engines uncertain, and uncertain engines stay quiet about you.",
+      "Contradictions (two founding years, two addresses) make AI engines uncertain, and uncertain engines stay quiet about you.",
     howCalculated:
       "We extract company facts from every crawled page and compare them. Any conflicting value is raised as an entity consistency issue.",
     howToImprove: "Pick the correct value, correct every page that disagrees, and state it in Organization schema.",
@@ -226,7 +226,7 @@ export const METRIC_EXPLANATIONS = {
     howCalculated:
       "Classified from the answer text of each valid AI response and aggregated per engine. Reported as unknown when no mention occurred.",
     howToImprove:
-      "Look at the stored answers behind negative results — they usually quote a specific complaint or an out-of-date fact you can correct.",
+      "Look at the stored answers behind negative results: they usually quote a specific complaint or an out-of-date fact you can correct.",
   },
   opportunityPriority: {
     label: "Priority Score",

@@ -19,7 +19,7 @@ import { breadcrumbSchema, faqSchema } from "@/lib/config/structured-data";
 export const metadata: Metadata = {
   title: "AI Visibility Monitoring",
   description:
-    "Measure how often ChatGPT, Gemini, Claude, Perplexity and Grok mention your brand, cite your website and recommend you — with every measurement labelled by engine, model and date.",
+    "Measure how often ChatGPT, Gemini, Claude, Perplexity and Grok mention your brand, cite your website and recommend you, with every measurement labelled by engine, model and date.",
   alternates: { canonical: "/ai-visibility" },
 };
 
@@ -37,17 +37,17 @@ const FAQS = [
   {
     question: "Why can't I just check ChatGPT myself?",
     answer:
-      "You can, once. AI answers vary between sessions, models and regions, so a single check tells you almost nothing. Visibility is a rate, not an event — it only means something measured across many prompts, repeatedly, over time.",
+      "You can, once. AI answers vary between sessions, models and regions, so a single check tells you almost nothing. Visibility is a rate, not an event: it only means something measured across many prompts, repeatedly, over time.",
   },
   {
     question: "Is an API result the same as what a real user sees?",
     answer:
-      "No, and we never claim it is. The consumer product and the developer API can use different models, different retrieval and different personalisation. An API observation is a rigorous, repeatable proxy — which is why we label every measurement with the engine, model and date rather than presenting it as a consumer ranking.",
+      "No, and we never claim it is. The consumer product and the developer API can use different models, different retrieval and different personalisation. An API observation is a rigorous, repeatable proxy, which is why we label every measurement with the engine, model and date rather than presenting it as a consumer ranking.",
   },
   {
     question: "What about Microsoft Copilot?",
     answer:
-      "Copilot has no public developer API for the consumer product, and we do not scrape Microsoft's consumer Copilot website. We support the Microsoft 365 Copilot Chat API for tenants that have it. Without that connection the product shows 'Copilot connection unavailable' and no data — never an estimate presented as a measurement.",
+      "Copilot has no public developer API for the consumer product, and we do not scrape Microsoft's consumer Copilot website. We support the Microsoft 365 Copilot Chat API for tenants that have it. Without that connection the product shows 'Copilot connection unavailable' and no data, never an estimate presented as a measurement.",
   },
   {
     question: "How many prompts should I track?",
@@ -78,7 +78,7 @@ export default function AiVisibilityPage() {
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
             Someone asks an AI assistant for the best option in your category. V Turn AI measures
-            whether you were named, cited, recommended — or never came up at all.
+            whether you were named, cited, recommended, or never came up at all.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Button size="lg" variant="gradient" asChild>
@@ -181,7 +181,7 @@ export default function AiVisibilityPage() {
             <ul className="mt-2 space-y-1">
               {Object.values(OBSERVATION_MODES).map((mode) => (
                 <li key={mode.key}>
-                  <span className="font-medium text-foreground">{mode.label}</span> — {mode.description}
+                  <span className="font-medium text-foreground">{mode.label}:</span> {mode.description}
                 </li>
               ))}
             </ul>
@@ -215,7 +215,7 @@ export default function AiVisibilityPage() {
         </div>
         <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground">
           V Turn AI suggests prompts from your own website content, your services, your Search
-          Console queries and your competitors — grouped by intent from awareness through to
+          Console queries and your competitors, grouped by intent from awareness through to
           transactional. You edit them before any of them go live.
         </p>
       </Section>

@@ -11,7 +11,7 @@ import { navItemFor } from "@/lib/config/navigation";
 /**
  * Application chrome.
  *
- * Only the shell is a Client Component — the sidebar needs local collapse state
+ * Only the shell is a Client Component, the sidebar needs local collapse state
  * and the mobile drawer needs interaction. Page content stays on the server.
  */
 export function AppShell({

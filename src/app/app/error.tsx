@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 /**
  * Application error boundary.
  *
- * Scoped inside the app shell so the sidebar stays usable — a failure on one
+ * Scoped inside the app shell so the sidebar stays usable, a failure on one
  * screen should not strand someone with no way to reach the rest of the product.
  */
 export default function AppError({

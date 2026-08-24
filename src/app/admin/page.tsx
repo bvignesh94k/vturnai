@@ -361,10 +361,10 @@ export default async function AdminPage() {
                   <TableRow key={`${event.event_type}-${event.occurred_at}-${index}`}>
                     <TableCell className="pl-5 text-sm">{event.event_type}</TableCell>
                     <TableCell className="text-sm capitalize text-muted-foreground">
-                      {event.status ?? "—"}
+                      {event.status ?? "N/A"}
                     </TableCell>
                     <TableCell className="text-right tabular-nums text-sm">
-                      {event.amount_minor ? formatCurrencyINR(event.amount_minor) : "—"}
+                      {event.amount_minor ? formatCurrencyINR(event.amount_minor) : "N/A"}
                     </TableCell>
                     <TableCell className="pr-5 text-right text-xs text-muted-foreground">
                       {relativeTime(event.occurred_at)}

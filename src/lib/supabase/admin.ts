@@ -11,7 +11,7 @@ let cached: ReturnType<typeof createClient<Database>> | null = null;
  *
  * Only background jobs, verified webhooks and integration credential access may
  * use this. Every call site must have already established which organization or
- * project the caller is entitled to — RLS is not there to catch mistakes here.
+ * project the caller is entitled to, RLS is not there to catch mistakes here.
  */
 export function createServiceRoleClient() {
   if (cached) return cached;

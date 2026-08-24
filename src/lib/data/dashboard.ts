@@ -20,7 +20,7 @@ import type { CrawlRow, JobRow, ProjectScoreRow, SentimentDb } from "@/lib/db/ty
  * Dashboard data loading.
  *
  * All queries run through the request-scoped Supabase client so RLS applies.
- * The functions here return view models — the pages that use them do no
+ * The functions here return view models, the pages that use them do no
  * arithmetic of their own, which keeps the numbers consistent across surfaces.
  */
 

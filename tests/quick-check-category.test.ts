@@ -6,7 +6,7 @@ import { categoryFromPage } from "@/lib/analysis/quick-check";
  *
  * The phrase this returns is quoted straight back to an anonymous visitor
  * inside a question ("Which <category> should a small business choose?"), so a
- * bad extraction is not a silent scoring wobble — it is a broken sentence on
+ * bad extraction is not a silent scoring wobble, it is a broken sentence on
  * the highest-traffic page in the funnel. Left to its own fallback the prompt
  * generator reads the first H2, which on a marketing homepage is a slogan and
  * produced "Who provides the backbone of global commerce?".

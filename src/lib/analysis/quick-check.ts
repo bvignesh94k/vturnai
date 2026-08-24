@@ -51,7 +51,7 @@ export interface QuickCheckResult {
   topFindings: Array<{ title: string; detail: string; severity: "critical" | "high" | "medium" | "low" }>;
   /**
    * Neutral category questions we would put to the answer engines on this
-   * brand's behalf. Generated, never executed — see `runQuickCheck`.
+   * brand's behalf. Generated, never executed, see `runQuickCheck`.
    */
   aiPrompts: string[];
   suggestions: AnalysisSuggestion[];
@@ -75,7 +75,7 @@ function countryFromHost(host: string | null): string | null {
   return CC_TLD_COUNTRIES[host.split(".").pop() ?? ""] ?? null;
 }
 
-/** "stripe.com" gives "Stripe" — a seed for generation, never shown to anyone. */
+/** "stripe.com" gives "Stripe", a seed for generation, never shown to anyone. */
 function brandSeedFromHost(host: string | null): string {
   if (!host) return "this brand";
   const label = host.split(".")[0] ?? host;
@@ -86,7 +86,7 @@ function brandSeedFromHost(host: string | null): string {
  * A short category phrase for prompt generation, read from the title tag.
  *
  * Left to itself the generator falls back to the first H2, which on a marketing
- * homepage is a slogan — Stripe's produced "Who provides the backbone of global
+ * homepage is a slogan, Stripe's produced "Who provides the backbone of global
  * commerce?", a question no buyer has ever typed. The title is the one element
  * almost every site uses to say what it actually sells, so we take the longest
  * brand-separated segment, cut it at the first connective, and keep the head
@@ -145,7 +145,7 @@ export async function runQuickCheck(siteUrl: string): Promise<QuickCheckResult> 
         ["organization", "localbusiness", "corporation"].includes(type.toLowerCase()),
       ),
       // A one-page check cannot see the rest of the site, so these are neutral
-      // rather than assumed false — we would otherwise punish sites unfairly.
+      // rather than assumed false, we would otherwise punish sites unfairly.
       hasAboutPage: true,
       hasContactPage: true,
       sameAsUrls: [],
@@ -249,7 +249,7 @@ export async function runQuickCheck(siteUrl: string): Promise<QuickCheckResult> 
   }
 
   // The question a visitor actually arrived with is "does ChatGPT name me when
-  // someone asks for this?" — so the check ends by showing the exact questions
+  // someone asks for this?", so the check ends by showing the exact questions
   // we would ask on their behalf. `generatePromptSuggestions` is pure and
   // synchronous, so this costs no API call and cannot be abused for spend on an
   // unauthenticated endpoint. The answers are what a trial buys.
@@ -272,7 +272,7 @@ export async function runQuickCheck(siteUrl: string): Promise<QuickCheckResult> 
     // templates, which are built from the title we resolved above, and question
     // headings, which the page already poses in the visitor's own words. The
     // "services" source reads H2s, and on a marketing homepage those are
-    // slogans — it produced "Who provides the backbone of global commerce?",
+    // slogans, it produced "Who provides the backbone of global commerce?",
     // a question no buyer has ever typed.
     .filter((suggestion) => {
       if (suggestion.source === "business_description") return true;
@@ -287,7 +287,7 @@ export async function runQuickCheck(siteUrl: string): Promise<QuickCheckResult> 
     })
     .map((suggestion) => suggestion.promptText)
     // A brand name inferred from the domain label is the other thing worth
-    // dropping — "Vturnu" for vturnu.com reads as a typo of the visitor's own
+    // dropping, "Vturnu" for vturnu.com reads as a typo of the visitor's own
     // name. What survives is the category questions, which are the ones that
     // make the point anyway: they never name you, so whether you show up in the
     // answer is the actual measurement.

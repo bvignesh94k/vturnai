@@ -277,7 +277,7 @@ function extractDates(
 }
 
 /**
- * Extract visible FAQ pairs. Only visible content counts — FAQPage schema
+ * Extract visible FAQ pairs. Only visible content counts, FAQPage schema
  * without matching on-page content is schema spam, and the AEO analyzer
  * reports it as such rather than rewarding it.
  */

@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
  *
  * These tests read the migrations rather than a live database, so they run in
  * CI without Postgres. They pin the structural guarantees the application
- * relies on — most importantly that every table has RLS enabled, and that the
+ * relies on, most importantly that every table has RLS enabled, and that the
  * encrypted credential table has no policy at all, which denies it to every
  * browser-facing role.
  */

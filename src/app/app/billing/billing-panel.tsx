@@ -78,7 +78,7 @@ export function BillingPanel({
 
   function openCheckout(subscriptionId: string, keyId: string, shortUrl: string | null) {
     if (!window.Razorpay) {
-      // The widget script did not load — Razorpay's hosted page still works.
+      // The widget script did not load, Razorpay's hosted page still works.
       if (shortUrl) {
         window.location.href = shortUrl;
         return;
@@ -93,7 +93,7 @@ export function BillingPanel({
       name: "V Turn AI",
       // Naming the workspace here means someone with several workspaces can see
       // which one they are paying for before they authorise the mandate.
-      description: `${planName} for ${organizationName} — ${formatCurrencyINR(priceMinor)}/month after a ${trialDays}-day free trial`,
+      description: `${planName} for ${organizationName}: ${formatCurrencyINR(priceMinor)}/month after a ${trialDays}-day free trial`,
       prefill: { email },
       theme: { color: "#5b3df5" },
       handler: (response) => {

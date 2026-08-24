@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  *
  * Three properties make this safe:
  *   1. The raw request body is read as text and used verbatim for signature
- *      verification — re-serialising parsed JSON would change the bytes.
+ *      verification, re-serialising parsed JSON would change the bytes.
  *   2. An invalid or missing signature is rejected before anything is parsed
  *      into application state.
  *   3. Event ids are stored under a unique constraint, so a replayed delivery

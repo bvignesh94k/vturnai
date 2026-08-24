@@ -9,7 +9,7 @@
  * Defence is in two layers:
  *   1. `assertPublicUrl` rejects obviously private hosts before any I/O.
  *   2. `resolveAndAssertPublicHost` resolves DNS and rejects the request when
- *      any resolved address is private — this catches DNS names that point at
+ *      any resolved address is private, this catches DNS names that point at
  *      internal space, including rebinding attempts at resolution time.
  */
 

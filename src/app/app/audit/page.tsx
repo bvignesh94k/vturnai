@@ -179,7 +179,7 @@ export default async function AuditPage({
               emptyHint="Run a performance check"
               footnote={
                 mobilePagespeed
-                  ? `LCP ${mobilePagespeed.lcp_ms ? `${round(mobilePagespeed.lcp_ms / 1000, 1)}s` : "—"} · CLS ${mobilePagespeed.cls ?? "—"}`
+                  ? `LCP ${mobilePagespeed.lcp_ms ? `${round(mobilePagespeed.lcp_ms / 1000, 1)}s` : "N/A"} · CLS ${mobilePagespeed.cls ?? "N/A"}`
                   : undefined
               }
             />
@@ -220,7 +220,7 @@ export default async function AuditPage({
                     {desktopPagespeed?.performance_score !== null &&
                     desktopPagespeed?.performance_score !== undefined
                       ? round(desktopPagespeed.performance_score, 0)
-                      : "—"}
+                      : "N/A"}
                     , measured on your key pages only to stay inside API quota.
                   </p>
                 ) : null}
@@ -236,7 +236,7 @@ export default async function AuditPage({
             {sorted.length === 0 ? (
               <EmptyState
                 title="No issues found"
-                description="Nothing was flagged in the last crawl. That is genuinely good news — check the AEO and GEO analyzers for content-level opportunities."
+                description="Nothing was flagged in the last crawl. That is genuinely good news. Check the AEO and GEO analyzers for content-level opportunities."
               />
             ) : (
               <IssueList issues={sorted} />

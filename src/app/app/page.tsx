@@ -395,7 +395,7 @@ export default async function OverviewPage({
             />
           )}
 
-          {/* Charts — kept to four so the screen stays readable */}
+          {/* Charts: kept to four so the screen stays readable */}
           <div className="grid gap-4 lg:grid-cols-2">
             <ScoreTrendChart data={trend} />
             <AiVisibilityTrendChart data={trend} />

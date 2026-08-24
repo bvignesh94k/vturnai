@@ -2,7 +2,7 @@
 
 Last updated: 19 August 2026
 
-**Verification:** `npm run verify` — TypeScript ✅ · ESLint ✅ · 235 tests ✅ ·
+**Verification:** `npm run verify`, TypeScript ✅ · ESLint ✅ · 235 tests ✅ ·
 production build ✅ (39 routes)
 
 ---

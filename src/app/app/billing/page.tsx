@@ -98,7 +98,7 @@ export default async function BillingPage({
               <div className="mt-3 space-y-1 text-sm text-muted-foreground">
                 {entitlements.isTrialing && entitlements.trialEndsAt ? (
                   <p>
-                    Trial ends {formatDate(entitlements.trialEndsAt)} —{" "}
+                    Trial ends {formatDate(entitlements.trialEndsAt)} ·{" "}
                     {entitlements.daysRemainingInTrial} day
                     {entitlements.daysRemainingInTrial === 1 ? "" : "s"} left. Your first payment is
                     collected then.
@@ -145,7 +145,7 @@ export default async function BillingPage({
         <CardHeader>
           <CardTitle className="text-base">Usage this month</CardTitle>
           <CardDescription>
-            Period {period.key}. Limits are enforced on the server — an action that would exceed one
+            Period {period.key}. Limits are enforced on the server: an action that would exceed one
             is refused before any provider is called.
           </CardDescription>
         </CardHeader>
@@ -187,7 +187,7 @@ export default async function BillingPage({
           <p className="border-t pt-4 text-xs leading-relaxed text-muted-foreground">
             Estimated AI provider spend this month:{" "}
             <span className="font-medium text-foreground">${round(spendUsd, 2)}</span>. This is our
-            cost of running your scans, shown for transparency — it is not billed to you.
+            cost of running your scans, shown for transparency. It is not billed to you.
           </p>
         </CardContent>
       </Card>
@@ -249,10 +249,10 @@ export default async function BillingPage({
                   <TableRow key={event.id}>
                     <TableCell className="pl-5 text-sm">{event.event_type}</TableCell>
                     <TableCell className="text-sm capitalize text-muted-foreground">
-                      {event.status ?? "—"}
+                      {event.status ?? "N/A"}
                     </TableCell>
                     <TableCell className="text-right tabular-nums text-sm">
-                      {event.amount_minor ? formatCurrencyINR(event.amount_minor) : "—"}
+                      {event.amount_minor ? formatCurrencyINR(event.amount_minor) : "N/A"}
                     </TableCell>
                     <TableCell className="pr-5 text-right text-xs text-muted-foreground">
                       {formatDateTime(event.occurred_at)}

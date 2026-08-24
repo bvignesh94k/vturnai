@@ -164,7 +164,7 @@ export function OnboardingWizard({
           </Alert>
         ) : null}
 
-        {/* Step 1 — website */}
+        {/* Step 1: website */}
         {step === 1 ? (
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
@@ -228,7 +228,7 @@ export function OnboardingWizard({
           </div>
         ) : null}
 
-        {/* Step 2 — brand */}
+        {/* Step 2: brand */}
         {step === 2 ? (
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">What is your brand called?</h1>
@@ -261,7 +261,7 @@ export function OnboardingWizard({
           </div>
         ) : null}
 
-        {/* Step 3 — business */}
+        {/* Step 3: business */}
         {step === 3 ? (
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">What does your business do?</h1>
@@ -311,7 +311,7 @@ export function OnboardingWizard({
           </div>
         ) : null}
 
-        {/* Step 4 — market */}
+        {/* Step 4: market */}
         {step === 4 ? (
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Who and where do you sell to?</h1>
@@ -360,7 +360,7 @@ export function OnboardingWizard({
           </div>
         ) : null}
 
-        {/* Step 5 — competitors + submit */}
+        {/* Step 5: competitors + submit */}
         {step === 5 ? (
           <form action={formAction}>
             <input type="hidden" name="siteUrl" value={siteUrl} />

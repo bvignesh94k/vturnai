@@ -43,7 +43,7 @@ export function MetricCard({
 
   const display =
     value === null
-      ? "—"
+      ? "N/A"
       : format === "percent"
         ? formatPercent(value, value >= 10 ? 0 : 1)
         : format === "score"

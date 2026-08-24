@@ -1,5 +1,5 @@
 /**
- * Perplexity adapter — the Sonar web-grounded answer API.
+ * Perplexity adapter, the Sonar web-grounded answer API.
  *
  * Perplexity is answer-first by design: every response is grounded in live
  * retrieval and returns the URLs it used, which makes it the cleanest citation

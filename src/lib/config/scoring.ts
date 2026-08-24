@@ -2,7 +2,7 @@
  * Scoring configuration.
  *
  * Every weight the product uses to produce a score lives in this file. Nothing
- * elsewhere may hard-code a weight — the score breakdown UI reads these same
+ * elsewhere may hard-code a weight, the score breakdown UI reads these same
  * objects so what we show the user is provably what we computed.
  */
 
@@ -14,7 +14,7 @@ export interface WeightedComponent {
   description: string;
 }
 
-/** HEO — the unified V Score. */
+/** HEO, the unified V Score. */
 export const HEO_WEIGHTS = {
   seo: 0.3,
   aeo: 0.2,
@@ -25,9 +25,9 @@ export const HEO_WEIGHTS = {
 export type HeoComponentKey = keyof typeof HEO_WEIGHTS;
 
 export const HEO_COMPONENT_LABELS: Record<HeoComponentKey, string> = {
-  seo: "SEO — technical & on-page health",
-  aeo: "AEO — answer readiness",
-  geo: "GEO — generative engine readiness",
+  seo: "SEO: technical & on-page health",
+  aeo: "AEO: answer readiness",
+  geo: "GEO: generative engine readiness",
   experienceAuthority: "Experience & Authority",
 };
 
@@ -77,7 +77,7 @@ export const SEO_WEIGHTS: readonly WeightedComponent[] = [
   },
 ] as const;
 
-/** AEO sub-scores — is this page usable as a direct answer? */
+/** AEO sub-scores, is this page usable as a direct answer? */
 export const AEO_WEIGHTS: readonly WeightedComponent[] = [
   {
     key: "questionTargeting",
@@ -171,7 +171,7 @@ export const AEO_WEIGHTS: readonly WeightedComponent[] = [
   },
 ] as const;
 
-/** GEO sub-scores — can a generative engine understand, trust and cite you? */
+/** GEO sub-scores, can a generative engine understand, trust and cite you? */
 export const GEO_WEIGHTS: readonly WeightedComponent[] = [
   {
     key: "entityConsistency",
@@ -259,7 +259,7 @@ export const GEO_WEIGHTS: readonly WeightedComponent[] = [
   },
 ] as const;
 
-/** Experience & Authority — the fourth HEO pillar. */
+/** Experience & Authority, the fourth HEO pillar. */
 export const EXPERIENCE_AUTHORITY_WEIGHTS: readonly WeightedComponent[] = [
   {
     key: "firstPartyExpertise",
@@ -293,7 +293,7 @@ export const EXPERIENCE_AUTHORITY_WEIGHTS: readonly WeightedComponent[] = [
   },
 ] as const;
 
-/** Citation readiness — scored per page. */
+/** Citation readiness, scored per page. */
 export const CITATION_READINESS_WEIGHTS: readonly WeightedComponent[] = [
   { key: "factualStatements", label: "Clear factual statements", weight: 0.12, description: "Statements a model can lift without hedging." },
   { key: "uniqueInformation", label: "Unique information", weight: 0.11, description: "Content that is not a restatement of what is already ranked." },

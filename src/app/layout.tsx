@@ -23,7 +23,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl()),
   title: {
-    default: `${SITE.name} — ${SITE.tagline}`,
+    default: `${SITE.name} · ${SITE.tagline}`,
     template: `%s | ${SITE.name}`,
   },
   description: SITE.shortDescription,
@@ -44,20 +44,20 @@ export const metadata: Metadata = {
   creator: SITE.name,
   publisher: SITE.name,
   alternates: { canonical: "/" },
-  // Icons come from the file conventions next to this file — `icon.svg` and
-  // `apple-icon.tsx` — so they are not re-declared here.
+  // Icons come from the file conventions next to this file, `icon.svg` and
+  // `apple-icon.tsx`, so they are not re-declared here.
   manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
     locale: "en_IN",
     url: appUrl(),
     siteName: SITE.name,
-    title: `${SITE.name} — ${SITE.tagline}`,
+    title: `${SITE.name} · ${SITE.tagline}`,
     description: SITE.shortDescription,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE.name} — ${SITE.tagline}`,
+    title: `${SITE.name} · ${SITE.tagline}`,
     description: SITE.shortDescription,
   },
   robots: {

@@ -1,5 +1,5 @@
 -- ============================================================================
--- V Turn AI — functions, triggers and RPCs
+-- V Turn AI: functions, triggers and RPCs
 --
 -- Membership helpers are SECURITY DEFINER so that RLS policies can call them
 -- without recursing back through the policies on organization_members.
@@ -146,7 +146,7 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- ---------------------------------------------------------------------------
--- Rate limiting RPC — atomic increment inside a fixed window
+-- Rate limiting RPC, atomic increment inside a fixed window
 -- ---------------------------------------------------------------------------
 
 create or replace function public.consume_rate_limit(

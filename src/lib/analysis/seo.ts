@@ -2,8 +2,8 @@
  * SEO analysis.
  *
  * Operates on a whole crawl rather than a page at a time, because the findings
- * that matter most — duplicate titles, orphan pages, broken internal links,
- * canonical conflicts — only exist in relation to other pages.
+ * that matter most, duplicate titles, orphan pages, broken internal links,
+ * canonical conflicts, only exist in relation to other pages.
  */
 
 import type { CrawledPage } from "@/lib/crawler/crawler";
@@ -175,7 +175,7 @@ export function analyseSeo(input: SeoAnalysisInput): SeoAnalysisResult {
         severity: "critical",
         disciplines: ["seo", "aeo", "geo"],
         whyItMatters:
-          "Without a title, search engines invent one from your page content — usually badly — and AI engines lose the clearest statement of what the page covers.",
+          "Without a title, search engines invent one from your page content (usually badly), and AI engines lose the clearest statement of what the page covers.",
         seoImpact: "Rankings suffer and the search result looks untrustworthy.",
         aeoImpact: "Answer engines cannot match the page to a question reliably.",
         geoImpact: "Generative engines lose the primary label for the page's topic.",
@@ -650,7 +650,7 @@ export function analyseSeo(input: SeoAnalysisInput): SeoAnalysisResult {
         aeoImpact: "Answer engines lose an explicit map of the page's questions and answers.",
         geoImpact: "Generative engines lack a verified identity for your organization and authors.",
         recommendation:
-          "Add Organization schema sitewide, plus the type matching each page — Article, Product, Service or FAQPage.",
+          "Add Organization schema sitewide, plus the type matching each page: Article, Product, Service or FAQPage.",
         implementationExample:
           '<script type="application/ld+json">\n{\n  "@context": "https://schema.org",\n  "@type": "Organization",\n  "name": "Acme",\n  "url": "https://acme.com",\n  "sameAs": ["https://www.linkedin.com/company/acme"]\n}\n</script>',
         effort: "moderate",

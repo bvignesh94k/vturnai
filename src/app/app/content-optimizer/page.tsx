@@ -16,7 +16,7 @@ export default async function ContentOptimizerPage({
     <div className="space-y-6">
       <PageHeader
         title="Content Optimizer"
-        description="Score an existing page or a draft before you publish it. Nothing here overwrites your content — every suggestion is yours to copy or ignore."
+        description="Score an existing page or a draft before you publish it. Nothing here overwrites your content. Every suggestion is yours to copy or ignore."
       />
       <ContentOptimizer projectId={project.id} siteUrl={project.site_url} />
     </div>

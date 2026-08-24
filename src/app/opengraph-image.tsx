@@ -6,7 +6,7 @@ import { SITE } from "@/lib/config/site";
  * to V Turn AI is recognisable in a feed, a Slack unfurl, or a search result's
  * rich preview before a single word is read.
  */
-export const alt = `${SITE.name} — ${SITE.tagline}`;
+export const alt = `${SITE.name} · ${SITE.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -130,7 +130,7 @@ export default async function OpenGraphImage() {
             display: "flex",
           }}
         >
-          SEO · AEO · GEO · HEO in one score — across Google, Bing, ChatGPT, Gemini, Claude,
+          SEO · AEO · GEO · HEO in one score, across Google, Bing, ChatGPT, Gemini, Claude,
           Perplexity and Grok.
         </div>
 

@@ -208,11 +208,11 @@ export function PromptManager({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1">1 — Highest</SelectItem>
+                      <SelectItem value="1">1 (Highest)</SelectItem>
                       <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3 — Normal</SelectItem>
+                      <SelectItem value="3">3 (Normal)</SelectItem>
                       <SelectItem value="4">4</SelectItem>
-                      <SelectItem value="5">5 — Lowest</SelectItem>
+                      <SelectItem value="5">5 (Lowest)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

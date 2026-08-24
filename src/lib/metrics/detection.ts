@@ -3,7 +3,7 @@
  *
  * This is the most consequential piece of the AI visibility pipeline: whether a
  * response "mentions" you decides every headline number. It is deliberately
- * conservative — a false positive inflates a customer's numbers and destroys
+ * conservative, a false positive inflates a customer's numbers and destroys
  * trust in the product, so ambiguous matches are rejected.
  */
 
@@ -139,7 +139,7 @@ export function sentencesMentioning(
 
 /**
  * Detect an active recommendation. Requires a recommendation cue in a sentence
- * that also mentions the brand and is not negated — "I would not recommend X"
+ * that also mentions the brand and is not negated, "I would not recommend X"
  * must never count as a recommendation.
  */
 export function detectRecommendation(

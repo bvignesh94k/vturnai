@@ -150,7 +150,7 @@ export function BuildingProfile({
 
       <div className="mt-9 border-t pt-6">
         <p className="text-sm text-muted-foreground">
-          This usually takes a few minutes. You can leave this page — the scan keeps running.
+          This usually takes a few minutes. You can leave this page. The scan keeps running.
         </p>
         <Button variant="outline" className="mt-4" onClick={() => router.push("/app")}>
           Go to dashboard

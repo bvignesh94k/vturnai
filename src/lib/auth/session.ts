@@ -3,8 +3,9 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import type { OrganizationRow, ProfileRow, ProjectRow, OrgRole } from "@/lib/db/types";
+import type { AdminResource, OrganizationRow, ProfileRow, ProjectRow, OrgRole } from "@/lib/db/types";
 
 export interface SessionUser {
   id: string;
@@ -128,6 +129,47 @@ export async function requirePlatformAdmin(): Promise<UserContext> {
   return context;
 }
 
+export interface AdminAccess {
+  user: SessionUser;
+  isPlatformAdmin: boolean;
+  /** Resources this account can reach: every resource for a full admin, else exactly its grants. */
+  resources: AdminResource[];
+}
+
+const ALL_ADMIN_RESOURCES: readonly AdminResource[] = ["leads", "blog"];
+
+/**
+ * Admin access independent of having a V Turn AI organization.
+ *
+ * `requireUserContext` redirects anyone with zero organization memberships to
+ * /login, which is right for the product but wrong here: a person granted
+ * blog-only or leads-only access may never sign up for a project at all. This
+ * checks platform_role and admin_grants directly against the profile instead.
+ */
+export const getAdminAccess = cache(async (): Promise<AdminAccess | null> => {
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const isPlatformAdmin = user.profile.platform_role === "admin";
+  if (isPlatformAdmin) return { user, isPlatformAdmin: true, resources: [...ALL_ADMIN_RESOURCES] };
+
+  const supabase = createServiceRoleClient();
+  const { data } = await supabase
+    .from("admin_grants")
+    .select("resource")
+    .eq("email", user.email.toLowerCase());
+
+  return { user, isPlatformAdmin: false, resources: (data ?? []).map((row) => row.resource) };
+});
+
+/** Redirects to /login when signed out, to /app when signed in without this grant. */
+export async function requireAdminAccess(resource: AdminResource): Promise<AdminAccess> {
+  const access = await getAdminAccess();
+  if (!access) redirect("/login");
+  if (!access.resources.includes(resource)) redirect("/app");
+  return access;
+}
+
 /**
  * Load a project the user is entitled to see. Returns null rather than throwing
  * so callers can render a not-found state.
@@ -146,7 +188,7 @@ export async function resolveActiveProject(
   if (requestedProjectId) {
     const match = context.projects.find((project) => project.id === requestedProjectId);
     if (match) return match;
-    // Not in the active org's list — verify via RLS in case it belongs to
+    // Not in the active org's list, verify via RLS in case it belongs to
     // another organization the user is also a member of.
     return getProjectForUser(requestedProjectId);
   }

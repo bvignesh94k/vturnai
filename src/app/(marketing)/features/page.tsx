@@ -53,7 +53,7 @@ const GROUPS = [
       {
         icon: <BarChart3Icon />,
         title: "Search & analytics integrations",
-        body: "Google Search Console, Bing Webmaster Tools, PageSpeed Insights and optional GA4 — including an AI referral traffic report.",
+        body: "Google Search Console, Bing Webmaster Tools, PageSpeed Insights and optional GA4, including an AI referral traffic report.",
       },
     ],
   },
@@ -75,7 +75,7 @@ const GROUPS = [
       {
         icon: <BuildingIcon />,
         title: "Brand & entity analysis",
-        body: "Builds one profile of your company from every page, then flags contradictions — two founding years, two phone numbers, two company names.",
+        body: "Builds one profile of your company from every page, then flags contradictions: two founding years, two phone numbers, two company names.",
       },
       {
         icon: <LinkIcon />,
@@ -97,7 +97,7 @@ const GROUPS = [
       {
         icon: <PenLineIcon />,
         title: "Content optimizer",
-        body: "Paste a URL or a draft and get SEO, AEO, GEO and HEO scores with grouped recommendations. Nothing is overwritten — every suggestion is yours to copy or ignore.",
+        body: "Paste a URL or a draft and get SEO, AEO, GEO and HEO scores with grouped recommendations. Nothing is overwritten. Every suggestion is yours to copy or ignore.",
       },
       {
         icon: <UsersIcon />,
@@ -119,7 +119,7 @@ const GROUPS = [
       {
         icon: <SlidersHorizontalIcon />,
         title: "Cost protection",
-        body: "AI scans run only from an explicit scan job — never from a page load. Duplicate prompts are skipped, quotas are enforced server-side and spend is logged.",
+        body: "AI scans run only from an explicit scan job, never from a page load. Duplicate prompts are skipped, quotas are enforced server-side and spend is logged.",
       },
       {
         icon: <BellIcon />,

@@ -50,7 +50,7 @@ const STORAGE_KEY = "vturnai:sidebar-collapsed";
  * Sidebar collapse state, persisted in localStorage.
  *
  * Read through `useSyncExternalStore` so the server renders the expanded
- * default and the client adopts the stored value during hydration — no effect,
+ * default and the client adopts the stored value during hydration, no effect,
  * no cascading render, and no flash of the wrong width after the first paint.
  */
 const collapseStore = {
@@ -78,7 +78,7 @@ const collapseStore = {
     try {
       window.localStorage.setItem(STORAGE_KEY, String(value));
     } catch {
-      // Ignore storage failures — the toggle still works for this session.
+      // Ignore storage failures, the toggle still works for this session.
     }
     for (const listener of collapseStore.listeners) listener();
   },

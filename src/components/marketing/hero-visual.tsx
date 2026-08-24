@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
  * The hero's product proof.
  *
  * A composed illustration of a real V Turn AI result, not a screenshot and not
- * live data — so it is labelled as an example. The product's entire position is
+ * live data, so it is labelled as an example. The product's entire position is
  * that it never dresses a guess up as a measurement; the marketing page has to
  * hold the same line.
  */

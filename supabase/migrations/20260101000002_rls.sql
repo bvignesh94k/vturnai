@@ -1,5 +1,5 @@
 -- ============================================================================
--- V Turn AI — Row Level Security
+-- V Turn AI: Row Level Security
 --
 -- Model:
 --   * A user sees only organizations they are a member of, and only the
@@ -131,7 +131,7 @@ create policy competitors_write on public.competitors
   with check (public.can_write_project(project_id));
 
 -- ---------------------------------------------------------------------------
--- Billing — readable by members, written only by verified server-side webhooks
+-- Billing, readable by members, written only by verified server-side webhooks
 -- ---------------------------------------------------------------------------
 
 create policy plan_configurations_select on public.plan_configurations
@@ -150,7 +150,7 @@ create policy billing_events_select on public.billing_events
   );
 
 -- ---------------------------------------------------------------------------
--- Crawl and analysis output — read-only to clients
+-- Crawl and analysis output, read-only to clients
 -- ---------------------------------------------------------------------------
 
 create policy crawls_select on public.crawls
@@ -191,7 +191,7 @@ create policy entity_issues_select on public.entity_issues
   using (public.is_project_member(project_id));
 
 -- ---------------------------------------------------------------------------
--- Prompts — user-managed
+-- Prompts, user-managed
 -- ---------------------------------------------------------------------------
 
 create policy prompts_select on public.prompts
@@ -228,7 +228,7 @@ create policy prompt_tags_write on public.prompt_tags
   );
 
 -- ---------------------------------------------------------------------------
--- AI visibility output — read-only to clients
+-- AI visibility output, read-only to clients
 -- ---------------------------------------------------------------------------
 
 create policy ai_scans_select on public.ai_scans
@@ -288,7 +288,7 @@ create policy pagespeed_runs_select on public.pagespeed_runs
   using (public.is_project_member(project_id));
 
 -- ---------------------------------------------------------------------------
--- Opportunities — clients may update workflow status only
+-- Opportunities, clients may update workflow status only
 -- ---------------------------------------------------------------------------
 
 create policy opportunities_select on public.opportunities

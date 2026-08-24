@@ -268,7 +268,7 @@ export function IntegrationsBoard({
         <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
           AI provider keys are configured at the deployment level, not per account, so no customer
           ever handles a provider secret. An engine without a key reports as unavailable and shows no
-          data — we never estimate a figure to fill the gap.
+          data. We never estimate a figure to fill the gap.
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           {engineCards.map((card) => {

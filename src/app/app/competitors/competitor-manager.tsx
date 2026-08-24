@@ -60,7 +60,7 @@ export function CompetitorManager({
                     <p className="text-xs text-muted-foreground">{competitor.domain}</p>
                   ) : (
                     <p className="text-xs text-muted-foreground/70">
-                      No website — citation matching is disabled for this competitor
+                      No website. Citation matching is disabled for this competitor
                     </p>
                   )}
                 </div>

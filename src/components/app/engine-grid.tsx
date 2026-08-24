@@ -32,7 +32,7 @@ const SENTIMENT_LABEL = {
  * The AI Engine Visibility grid.
  *
  * Engines with no authorised connection show their configuration state instead
- * of a zero — a zero would read as "the engine ignores you", which is a
+ * of a zero, a zero would read as "the engine ignores you", which is a
  * materially different and untrue claim.
  */
 export function EngineGrid({
@@ -118,7 +118,7 @@ export function EngineGrid({
                     </TableCell>
                   ) : !hasData ? (
                     <TableCell colSpan={5} className="text-sm text-muted-foreground">
-                      No data yet — run an AI visibility scan.
+                      No data yet. Run an AI visibility scan.
                     </TableCell>
                   ) : (
                     <>
@@ -164,7 +164,7 @@ export function EngineGrid({
                   )}
 
                   <TableCell className="pr-5 text-right text-xs text-muted-foreground">
-                    {unavailable ? "—" : relativeTime(row.lastCheckedAt)}
+                    {unavailable ? "N/A" : relativeTime(row.lastCheckedAt)}
                   </TableCell>
                 </TableRow>
               );

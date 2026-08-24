@@ -77,7 +77,7 @@ export async function signUpAction(
   if (!data.session) {
     return {
       notice:
-        "Check your inbox — we have sent a confirmation link. Open it to finish creating your account.",
+        "Check your inbox. We have sent a confirmation link. Open it to finish creating your account.",
     };
   }
 

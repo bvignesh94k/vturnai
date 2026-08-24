@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
  * V Turn AI identity.
  *
  * The geometry here is the vector original from the brand pack
- * (`public/brand/vturnai-icon.svg`) — a V whose second stroke does not stop at
+ * (`public/brand/vturnai-icon.svg`), a V whose second stroke does not stop at
  * the vertex but turns and rises into an arrow. Do not re-draw, re-colour or
  * re-space it: the gradients below are the brand gradients, stated in the exact
  * hex values from the brand sheet rather than theme tokens, so the mark reads

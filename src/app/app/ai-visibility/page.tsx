@@ -315,7 +315,7 @@ export default async function AiVisibilityPage({
             <ul className="space-y-1">
               {unconfigured.map((status) => (
                 <li key={status.id}>
-                  <span className="font-medium text-foreground">{status.name}</span> — {status.message}
+                  <span className="font-medium text-foreground">{status.name}:</span> {status.message}
                 </li>
               ))}
             </ul>

@@ -7,7 +7,7 @@ import { SITE } from "@/lib/config/site";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: `${SITE.name} — ${SITE.tagline}`,
+    name: `${SITE.name} · ${SITE.tagline}`,
     short_name: SITE.name,
     description: SITE.shortDescription,
     start_url: "/app",

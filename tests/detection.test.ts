@@ -13,7 +13,7 @@ import {
 /**
  * Detection decides every headline AI number. A false positive here inflates a
  * customer's metrics and destroys trust in the product, so these tests pin both
- * what must match and — more importantly — what must not.
+ * what must match and, more importantly, what must not.
  */
 
 describe("brandVariants", () => {
@@ -177,7 +177,7 @@ describe("analyseAnswer", () => {
   it("produces a complete, consistent analysis", () => {
     const result = analyseAnswer({
       answer:
-        "For a small Indian sales team I would recommend Acme CRM — it is affordable and reliable. Zoho is another option.",
+        "For a small Indian sales team I would recommend Acme CRM, which is affordable and reliable. Zoho is another option.",
       brand: "Acme CRM",
       domain: "acme.com",
       citations: [

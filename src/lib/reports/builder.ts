@@ -14,7 +14,7 @@ import { round } from "@/lib/utils";
  *
  * Produces one structured payload covering every section of the deliverable.
  * It always states its data sources and the scan date, and any section without
- * a connected source is marked unavailable rather than silently omitted — a
+ * a connected source is marked unavailable rather than silently omitted, a
  * report that quietly drops a section reads as though the data was zero.
  */
 
@@ -284,7 +284,7 @@ export async function buildReportPayload(input: {
   }
 
   return {
-    title: `${project.name} — Visibility Report`,
+    title: `${project.name}: Visibility Report`,
     generatedAt: new Date().toISOString(),
     period: {
       start: periodStart.toISOString().slice(0, 10),

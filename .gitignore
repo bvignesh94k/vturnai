@@ -61,3 +61,6 @@ coverage/
 # Supabase SQL Editor. The migrations themselves are the source of truth.
 vturnai-schema.sql
 vturnai-backfill-profiles.sql
+
+# Local Supabase CLI cache, not project content.
+supabase/.temp/

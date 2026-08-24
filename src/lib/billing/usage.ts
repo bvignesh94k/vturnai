@@ -62,7 +62,7 @@ export async function getEstimatedSpendUsd(
 
 /**
  * Record consumption and fire usage warnings at the configured thresholds.
- * Recording never throws — losing a usage row must not fail a user's scan — but
+ * Recording never throws, losing a usage row must not fail a user's scan, but
  * failures are logged so the discrepancy is visible in admin.
  */
 export async function recordUsage(input: RecordUsageInput, limits?: PlanLimits): Promise<void> {

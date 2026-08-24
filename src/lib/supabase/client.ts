@@ -7,7 +7,7 @@ import { requireSupabasePublicEnv } from "@/lib/supabase/env";
 let cached: ReturnType<typeof createBrowserClient<Database>> | null = null;
 
 /**
- * Browser Supabase client. Uses the anon key only — RLS is what protects data,
+ * Browser Supabase client. Uses the anon key only, RLS is what protects data,
  * and no privileged key is ever shipped to the browser.
  */
 export function createClient() {

@@ -199,7 +199,7 @@ export default async function GeoPage({
         />
         <ScoreBreakdown
           title="Citation readiness"
-          description="What makes your pages quotable — or not."
+          description="What makes your pages quotable, or not."
           score={
             pages.length > 0
               ? round(
@@ -217,8 +217,8 @@ export default async function GeoPage({
           <CardHeader>
             <CardTitle className="text-base">How to become more citable</CardTitle>
             <CardDescription>
-              Derived from what your pages are actually missing. We cannot guarantee a citation — no
-              tool can — but these are the factors engines demonstrably reward.
+              Derived from what your pages are actually missing. We cannot guarantee a citation (no
+              tool can), but these are the factors engines demonstrably reward.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">

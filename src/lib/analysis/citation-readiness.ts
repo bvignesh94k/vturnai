@@ -1,5 +1,5 @@
 /**
- * Citation Readiness — how likely one page is to be quoted or linked by an AI
+ * Citation Readiness, how likely one page is to be quoted or linked by an AI
  * engine.
  *
  * Scored per page, because citation is a page-level event. The output is
@@ -90,12 +90,12 @@ export function analyseCitationReadiness(page: ExtractedPage): CitationReadiness
 
 const CITATION_ACTIONS: Record<string, string> = {
   factualStatements:
-    "Rewrite three descriptive claims as specific, checkable statements — a number, a timeframe or a named source.",
+    "Rewrite three descriptive claims as specific, checkable statements: a number, a timeframe or a named source.",
   uniqueInformation:
     "Publish something only you can know: an internal benchmark, an aggregate from your own customer base, or a result you measured.",
   statistics: "Add at least three concrete figures with units and the period they cover.",
   research:
-    "Describe how you got your numbers — sample size, time period and method. One short methodology note is enough.",
+    "Describe how you got your numbers: sample size, time period and method. One short methodology note is enough.",
   sources:
     "Link the primary source behind each external claim. Government, academic and original-research domains carry the most weight.",
   author: "Add a named author with a role and one line of relevant credentials.",
@@ -105,7 +105,7 @@ const CITATION_ACTIONS: Record<string, string> = {
   tables: "Add a table for any comparison, specification or pricing detail currently written as prose.",
   faqs: "Add three real follow-up questions with short answers, visible on the page.",
   structuredData:
-    "Add structured data matching the page type — Article, Product, Service or FAQPage — alongside Organization schema.",
+    "Add structured data matching the page type (Article, Product, Service or FAQPage) alongside Organization schema.",
   entityClarity: "Make the title and single H1 name the subject explicitly, including the brand where relevant.",
   originalExpertise:
     "Write from first-hand experience: what you tried, what happened, and what you would do differently.",

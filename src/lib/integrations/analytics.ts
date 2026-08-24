@@ -9,8 +9,8 @@ import { isRecord, round } from "@/lib/utils";
 /**
  * Google Analytics 4 (optional).
  *
- * Used for organic sessions, landing pages, engagement, key events and — the
- * part unique to this product — identifying referral traffic that arrived from
+ * Used for organic sessions, landing pages, engagement, key events and, the
+ * part unique to this product, identifying referral traffic that arrived from
  * an AI assistant.
  *
  * An honest caveat we repeat in the UI: GA4 can only see visits that actually

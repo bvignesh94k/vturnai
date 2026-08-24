@@ -23,19 +23,19 @@ export function percentage(numerator: number, denominator: number, decimals = 1)
 }
 
 export function formatNumber(value: number | null | undefined, locale = "en-IN"): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return "—";
+  if (value === null || value === undefined || Number.isNaN(value)) return "N/A";
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value);
 }
 
 export function formatCompact(value: number | null | undefined, locale = "en-IN"): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return "—";
+  if (value === null || value === undefined || Number.isNaN(value)) return "N/A";
   return new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 }).format(
     value,
   );
 }
 
 export function formatPercent(value: number | null | undefined, decimals = 1): string {
-  if (value === null || value === undefined || Number.isNaN(value)) return "—";
+  if (value === null || value === undefined || Number.isNaN(value)) return "N/A";
   return `${round(value, decimals)}%`;
 }
 
@@ -48,9 +48,9 @@ export function formatCurrencyINR(paise: number): string {
 }
 
 export function formatDate(value: string | Date | null | undefined, locale = "en-IN"): string {
-  if (!value) return "—";
+  if (!value) return "N/A";
   const date = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "N/A";
   return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",
@@ -59,9 +59,9 @@ export function formatDate(value: string | Date | null | undefined, locale = "en
 }
 
 export function formatDateTime(value: string | Date | null | undefined, locale = "en-IN"): string {
-  if (!value) return "—";
+  if (!value) return "N/A";
   const date = typeof value === "string" ? new Date(value) : value;
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "N/A";
   return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "short",

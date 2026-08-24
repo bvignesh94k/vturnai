@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 /**
  * The hero's primary action.
  *
- * A visitor arrives asking one question — "does any of this apply to me?" — and
+ * A visitor arrives asking one question, "does any of this apply to me?", and
  * the fastest honest answer is their own homepage scored in front of them. So
  * the hero asks for a URL rather than offering a tour: the address is carried
  * to the free check, which runs it on arrival.
@@ -62,7 +62,7 @@ export function HeroCheckForm() {
       </form>
 
       <p className="mt-3.5 text-sm text-muted-foreground">
-        Free, no card, no signup — or{" "}
+        Free, no card, no signup, or{" "}
         <a href="/signup" className="font-medium text-foreground underline underline-offset-4 hover:text-primary">
           start the 7-day trial
         </a>{" "}

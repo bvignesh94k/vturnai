@@ -775,6 +775,31 @@ export type SystemErrorRow = {
   created_at: string;
 }
 
+export type AdminResource = "leads" | "blog";
+
+export type BlogPostRow = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  body_markdown: string;
+  cover_image_url: string | null;
+  author_name: string;
+  is_published: boolean;
+  published_at: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type AdminGrantRow = {
+  id: string;
+  email: string;
+  resource: AdminResource;
+  granted_by: string | null;
+  created_at: string;
+}
+
 // ---------------------------------------------------------------------------
 // Database shape consumed by the Supabase client
 // ---------------------------------------------------------------------------
@@ -1001,6 +1026,11 @@ export type Database = {
         SystemErrorRow,
         Partial<SystemErrorRow> & { scope: string; message: string }
       >;
+      blog_posts: TableShape<
+        BlogPostRow,
+        Insertable<BlogPostRow, "excerpt" | "cover_image_url" | "author_name" | "is_published" | "published_at" | "created_by">
+      >;
+      admin_grants: TableShape<AdminGrantRow, Insertable<AdminGrantRow, "granted_by">>;
     };
     Views: { [_ in never]: never };
     Functions: {
@@ -1052,6 +1082,7 @@ export type Database = {
       usage_metric: UsageMetricDb;
       notification_type: NotificationTypeDb;
       report_status: ReportStatus;
+      admin_resource: AdminResource;
     };
     CompositeTypes: { [_ in never]: never };
   };

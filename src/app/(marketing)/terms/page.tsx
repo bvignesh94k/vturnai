@@ -57,7 +57,7 @@ const SECTIONS = [
     list: [
       "We do not guarantee any ranking, mention, citation or recommendation on any engine.",
       "We do not guarantee that implementing a recommendation will produce a specific outcome.",
-      "Scores are analytical opinions derived from published, documented methodology — not statements of fact about your business.",
+      "Scores are analytical opinions derived from published, documented methodology, not statements of fact about your business.",
     ],
   },
   {

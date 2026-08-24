@@ -89,7 +89,7 @@ export async function handleInitialScan(job: JobRow): Promise<void> {
 /**
  * Generate suggested prompts from the crawled site and, where available, real
  * Search Console queries. The user reviews and edits these before activating
- * them — nothing is executed against a paid engine automatically.
+ * them, nothing is executed against a paid engine automatically.
  */
 async function generateSuggestedPrompts(job: JobRow, projectId: string): Promise<void> {
   const supabase = createServiceRoleClient();
@@ -212,7 +212,7 @@ async function activateStarterPrompts(input: {
   const limit = Math.min(STARTER_PROMPT_COUNT, entitlements.limits.activePrompts);
   if (limit <= 0) return 0;
 
-  // Lower `priority` ranks higher — see the sort in generatePromptSuggestions.
+  // Lower `priority` ranks higher, see the sort in generatePromptSuggestions.
   const { data: candidates } = await supabase
     .from("prompts")
     .select("id")

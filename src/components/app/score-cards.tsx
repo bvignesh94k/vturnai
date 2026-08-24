@@ -89,7 +89,7 @@ export function ScoreCards({ snapshot }: { snapshot: ScoreSnapshot }) {
                     />
                   </div>
                   <p className="mt-1.5 text-2xl font-semibold tabular-nums tracking-tight">
-                    {value === null ? "—" : round(value, 0)}
+                    {value === null ? "N/A" : round(value, 0)}
                   </p>
                   <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
                     <div

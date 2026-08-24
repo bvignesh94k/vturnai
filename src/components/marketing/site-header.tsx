@@ -9,12 +9,14 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/utils";
 
+// Header carries only the links a prospective customer needs to evaluate and
+// convert. Discovery content (About, Blog) lives in the footer only, per
+// product direction, a header that also tries to be a sitemap dilutes both.
 const NAV_LINKS = [
   { href: "/features", label: "Features" },
   { href: "/ai-visibility", label: "AI Visibility" },
   { href: "/seo-audit", label: "SEO Audit" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/about", label: "About" },
 ];
 
 export function SiteHeader() {
@@ -22,7 +24,7 @@ export function SiteHeader() {
   const [open, setOpen] = React.useState(false);
 
   // Each mobile link closes the menu itself, so no effect on `pathname` is
-  // needed — and no extra render happens on navigation.
+  // needed, and no extra render happens on navigation.
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">

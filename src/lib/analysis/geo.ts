@@ -1,5 +1,5 @@
 /**
- * GEO analysis — generative engine readiness.
+ * GEO analysis, generative engine readiness.
  *
  * The question this module answers is not "will this rank?" but "can a
  * generative engine understand who you are, believe what you say, and safely
@@ -230,7 +230,7 @@ export function analysePageGeo(input: GeoAnalysisInput): GeoAnalysisResult {
       code: "no_citation_worthy_statements",
       title: "Nothing on this page is specific enough to quote",
       description:
-        "The page contains no checkable figures or plain definitions — only descriptive claims.",
+        "The page contains no checkable figures or plain definitions, only descriptive claims.",
       severity: "medium",
       disciplines: ["geo"],
       whyItMatters:

@@ -3,7 +3,7 @@
  *
  * `envKeys` names the server-side environment variables that make a provider
  * usable. Nothing here implies any partnership with, or endorsement by, the
- * companies that operate these engines — we call their public developer APIs.
+ * companies that operate these engines, we call their public developer APIs.
  */
 
 export const ENGINE_IDS = [

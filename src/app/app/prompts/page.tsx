@@ -33,7 +33,7 @@ export default async function PromptsPage({
     <div className="space-y-6">
       <PageHeader
         title="Prompt Tracker"
-        description="People do not type keywords into an AI assistant — they ask questions. These are the questions we send to each engine on your behalf."
+        description="People do not type keywords into an AI assistant. They ask questions. These are the questions we send to each engine on your behalf."
       />
 
       {suggestedCount > 0 ? (

@@ -67,8 +67,8 @@ function consumeInMemory(bucketKey: string, rule: RateLimitRule, now: number): R
 
 /**
  * Consume one unit against a rule for a subject (user id, project id or IP).
- * Fails open on infrastructure errors — a rate limiter outage must not take the
- * product down — but the in-memory counter still applies within the instance.
+ * Fails open on infrastructure errors, a rate limiter outage must not take the
+ * product down, but the in-memory counter still applies within the instance.
  */
 export async function consumeRateLimit(
   rule: RateLimitRule,

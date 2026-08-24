@@ -35,7 +35,7 @@ export default async function ReportDetailPage({
         <h2 className="text-xl font-semibold tracking-tight">This report is not ready yet</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Status: {report.status}
-          {report.error_message ? ` — ${report.error_message}` : ""}
+          {report.error_message ? `: ${report.error_message}` : ""}
         </p>
         <Button variant="outline" asChild className="mt-6">
           <Link href="/app/reports">
@@ -115,7 +115,7 @@ export default async function ReportDetailPage({
                   {entry.label}
                 </p>
                 <p className="mt-1.5 text-2xl font-semibold tabular-nums">
-                  {entry.value === null ? "—" : round(entry.value, 0)}
+                  {entry.value === null ? "N/A" : round(entry.value, 0)}
                 </p>
               </CardContent>
             </Card>
@@ -146,7 +146,7 @@ export default async function ReportDetailPage({
                       {entry.label}
                     </p>
                     <p className="mt-1.5 text-2xl font-semibold tabular-nums">
-                      {entry.value === undefined || entry.value === null ? "—" : `${round(entry.value, 0)}%`}
+                      {entry.value === undefined || entry.value === null ? "N/A" : `${round(entry.value, 0)}%`}
                     </p>
                   </CardContent>
                 </Card>
@@ -176,13 +176,13 @@ export default async function ReportDetailPage({
                           <p className="text-xs text-muted-foreground">{engine.vendor}</p>
                         </TableCell>
                         <TableCell className="text-right tabular-nums">
-                          {engine.validResponses > 0 ? round(engine.visibilityScore, 0) : "—"}
+                          {engine.validResponses > 0 ? round(engine.visibilityScore, 0) : "N/A"}
                         </TableCell>
                         <TableCell className="text-right tabular-nums">
-                          {engine.validResponses > 0 ? engine.mentions : "—"}
+                          {engine.validResponses > 0 ? engine.mentions : "N/A"}
                         </TableCell>
                         <TableCell className="text-right tabular-nums">
-                          {engine.validResponses > 0 ? engine.citations : "—"}
+                          {engine.validResponses > 0 ? engine.citations : "N/A"}
                         </TableCell>
                         <TableCell className="pr-5 capitalize">
                           {engine.validResponses > 0 ? engine.sentiment : "No data"}

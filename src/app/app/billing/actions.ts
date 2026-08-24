@@ -19,7 +19,7 @@ const log = logger.child("billing-actions");
  * Billing actions.
  *
  * Only owners and admins may change billing. Every path that could change
- * subscription state either calls Razorpay directly or verifies a signature —
+ * subscription state either calls Razorpay directly or verifies a signature -
  * a value posted by the browser is never accepted as proof of payment.
  */
 async function requireBillingAdmin() {
@@ -70,7 +70,7 @@ export async function startSubscriptionAction(): Promise<StartSubscriptionResult
  * Verify a completed Checkout handshake.
  *
  * The signature proves the payment came from Razorpay, but we still re-fetch
- * the subscription from their API before writing status — the signature only
+ * the subscription from their API before writing status, the signature only
  * proves authenticity, not the current state.
  */
 export async function verifyCheckoutAction(formData: FormData): Promise<ActionResult> {

@@ -1,7 +1,7 @@
 /**
  * Shared analysis types.
  *
- * Every issue the product raises carries the full explanation set — what it is,
+ * Every issue the product raises carries the full explanation set, what it is,
  * why it matters, its impact on each discipline, the exact recommendation, a
  * copyable implementation example and an honest effort estimate. A finding
  * without all of that is not actionable, and this type makes that non-optional.

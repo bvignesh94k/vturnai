@@ -1,5 +1,5 @@
 -- ============================================================================
--- V Turn AI — core schema
+-- V Turn AI: core schema
 --
 -- Conventions used throughout:
 --   * UUID primary keys, generated with gen_random_uuid()

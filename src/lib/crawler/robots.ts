@@ -2,7 +2,7 @@
  * robots.txt parsing.
  *
  * Two jobs: keep the V Turn AI crawler compliant, and tell the user whether
- * they are blocking the AI crawlers that feed generative answer engines — a
+ * they are blocking the AI crawlers that feed generative answer engines, a
  * common and completely invisible cause of zero AI visibility.
  */
 
@@ -28,7 +28,7 @@ export interface RobotsTxt {
 /**
  * User agents used by AI answer engines to fetch pages for retrieval and
  * training. Blocking these does not improve privacy in any way a business owner
- * usually intends — it removes them from AI answers entirely.
+ * usually intends, it removes them from AI answers entirely.
  */
 export const AI_CRAWLER_AGENTS = [
   { agent: "GPTBot", engine: "OpenAI", purpose: "Training and retrieval for ChatGPT" },
@@ -208,7 +208,7 @@ export interface BlockedAiCrawler {
  * disallowed for that agent; `partial` means only some paths are.
  *
  * Only agents named explicitly, or covered by a wildcard group that disallows
- * something, are reported — an unmatched agent is not blocked.
+ * something, are reported, an unmatched agent is not blocked.
  */
 export function detectBlockedAiCrawlers(robots: RobotsTxt, siteUrl?: string): BlockedAiCrawler[] {
   if (!robots.found) return [];

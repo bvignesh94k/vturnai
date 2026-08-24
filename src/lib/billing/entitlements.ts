@@ -18,8 +18,8 @@ import type { SubscriptionRow, SubscriptionStatus } from "@/lib/db/types";
 /**
  * Billing entitlements.
  *
- * Everything that decides whether a user may spend money — start a scan, crawl
- * pages, call a provider — resolves through this module, on the server, from
+ * Everything that decides whether a user may spend money, start a scan, crawl
+ * pages, call a provider, resolves through this module, on the server, from
  * the database. The browser's opinion of subscription status is never consulted.
  */
 

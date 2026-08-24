@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 /**
  * Print entry point.
  *
- * The report is print-friendly HTML today — the browser's own "Save as PDF"
+ * The report is print-friendly HTML today, the browser's own "Save as PDF"
  * produces the deliverable. A server-side PDF renderer can be added behind the
  * export service later without changing the report data itself.
  */

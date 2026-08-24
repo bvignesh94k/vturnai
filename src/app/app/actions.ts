@@ -97,7 +97,7 @@ export async function startCrawlAction(formData: FormData): Promise<ActionResult
 
     revalidatePath("/app");
     revalidatePath("/app/audit");
-    return { ok: true, message: "Audit started. You can leave this page — it keeps running." };
+    return { ok: true, message: "Audit started. You can leave this page. It keeps running." };
   } catch (error) {
     return fail(error);
   }
@@ -585,7 +585,7 @@ export async function createReportAction(formData: FormData): Promise<ActionResu
       .insert({
         project_id: project.id,
         created_by: context.user.id,
-        title: parsed.title ?? `${project.name} — Visibility Report`,
+        title: parsed.title ?? `${project.name}: Visibility Report`,
         report_type: "full",
         status: "queued",
       })

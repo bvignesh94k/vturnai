@@ -6,7 +6,7 @@ import { PRO_PLAN } from "@/lib/config/plans";
  *
  * V Turn AI tells customers that clear structured identity is what makes a
  * brand citable, so our own site carries a complete Organization, product and
- * FAQ graph — the same thing we score them on.
+ * FAQ graph, the same thing we score them on.
  */
 
 export function organizationSchema(): Record<string, unknown> {
@@ -21,7 +21,7 @@ export function organizationSchema(): Record<string, unknown> {
     slogan: SITE.tagline,
     email: SITE.contactEmail,
     // The mark, declared as an ImageObject. Google's knowledge panel and the
-    // answer engines both read `logo` off Organization — an entity without one
+    // answer engines both read `logo` off Organization, an entity without one
     // gets described without a face.
     logo: {
       "@type": "ImageObject",
@@ -107,7 +107,7 @@ export function breadcrumbSchema(
 
 /**
  * FAQ schema. Only ever built from questions that are also rendered visibly on
- * the page — schema without matching content is exactly what our AEO analyzer
+ * the page, schema without matching content is exactly what our AEO analyzer
  * flags as spam.
  */
 export function faqSchema(
@@ -121,5 +121,32 @@ export function faqSchema(
       name: faq.question,
       acceptedAnswer: { "@type": "Answer", text: faq.answer },
     })),
+  };
+}
+
+export function articleSchema(input: {
+  title: string;
+  description: string;
+  path: string;
+  authorName: string;
+  publishedAt: string;
+  updatedAt: string;
+  imageUrl?: string | null;
+}): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: input.title,
+    description: input.description,
+    author: { "@type": "Organization", name: input.authorName },
+    publisher: {
+      "@type": "Organization",
+      name: SITE.name,
+      logo: { "@type": "ImageObject", url: absoluteUrl("/brand/vturnai-icon.png") },
+    },
+    datePublished: input.publishedAt,
+    dateModified: input.updatedAt,
+    mainEntityOfPage: { "@type": "WebPage", "@id": absoluteUrl(input.path) },
+    ...(input.imageUrl ? { image: input.imageUrl } : {}),
   };
 }

@@ -1,5 +1,5 @@
 /**
- * Gemini adapter — the Gemini API with Google Search grounding.
+ * Gemini adapter, the Gemini API with Google Search grounding.
  *
  * Grounding metadata gives us the web sources the model consulted, which is
  * what we record as citations. Note that Google's grounding redirect URLs are
@@ -31,7 +31,7 @@ const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 /**
  * Pinned deliberately rather than tracking a `-latest` alias. This product
  * reports visibility trends over time, and a model that changes underneath a
- * trend line makes the movement unattributable — a reader cannot tell a real
+ * trend line makes the movement unattributable, a reader cannot tell a real
  * visibility shift from a model swap. The cost of pinning is that a retired
  * model must be bumped by hand; Google 404s with the replacement name in the
  * message, and `GOOGLE_GEMINI_MODEL` overrides this without a deploy meanwhile.

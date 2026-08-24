@@ -1,5 +1,5 @@
 /**
- * AEO analysis — is this page usable as a direct answer?
+ * AEO analysis, is this page usable as a direct answer?
  *
  * Answer surfaces quote one short passage. This module scores how ready a page
  * is to be that passage, and produces concrete, copyable suggestions rather
@@ -154,7 +154,7 @@ export function analysePageAeo(page: ExtractedPage): AeoAnalysisResult {
     },
     {
       questionTargeting: `${page.questionHeadings.length} question-style heading${page.questionHeadings.length === 1 ? "" : "s"}.`,
-      directAnswers: `${answeredQuestions} of ${page.questionHeadings.length || "—"} questions have a quotable answer beneath them.`,
+      directAnswers: `${answeredQuestions} of ${page.questionHeadings.length} questions have a quotable answer beneath them.`,
       faqUsefulness: `${page.faqPairs.length} visible FAQ pair${page.faqPairs.length === 1 ? "" : "s"}.`,
       schema: relevantSchema.length > 0 ? `Schema found: ${relevantSchema.join(", ")}.` : "No answer-relevant schema found.",
       conciseness:

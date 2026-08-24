@@ -1,9 +1,9 @@
 /**
- * xAI Grok adapter — the xAI chat completions API with live search.
+ * xAI Grok adapter, the xAI chat completions API with live search.
  *
  * Search sources are restricted to the web here. X (Twitter) search is a
- * distinct source type with different visibility semantics — a post is not a
- * citable page — so it is deliberately left to a future adapter rather than
+ * distinct source type with different visibility semantics, a post is not a
+ * citable page, so it is deliberately left to a future adapter rather than
  * mixed into web citation counts.
  */
 

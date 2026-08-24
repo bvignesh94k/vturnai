@@ -9,7 +9,7 @@
  *
  * Until those credentials exist, this provider reports
  * "Copilot connection unavailable" and returns no data. It never estimates,
- * infers or fabricates a Copilot result — a fake number here would be worse
+ * infers or fabricates a Copilot result, a fake number here would be worse
  * than no number, because a customer would act on it.
  */
 
@@ -39,7 +39,7 @@ const TOKEN_ENDPOINT = (tenantId: string) =>
 
 /**
  * Microsoft 365 Copilot Chat endpoint. Held as a constant so that when a tenant
- * is connected the call site does not change — only credentials appear.
+ * is connected the call site does not change, only credentials appear.
  */
 const COPILOT_CHAT_ENDPOINT = "https://graph.microsoft.com/beta/copilot/conversations";
 
@@ -106,7 +106,7 @@ export class CopilotVisibilityProvider implements AIVisibilityProvider {
         ...status,
         message:
           status.missingEnvKeys.length > 0
-            ? `${COPILOT_UNAVAILABLE_MESSAGE} — a Microsoft 365 Copilot Chat connection and eligible licensing are required.`
+            ? `${COPILOT_UNAVAILABLE_MESSAGE}. A Microsoft 365 Copilot Chat connection and eligible licensing are required.`
             : COPILOT_UNAVAILABLE_MESSAGE,
       };
     }

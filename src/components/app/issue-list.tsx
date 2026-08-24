@@ -40,7 +40,7 @@ const EFFORT_LABEL: Record<EffortLevelDb, string> = {
  * The expandable issue row.
  *
  * Every issue shows why it matters, its impact on each discipline, the exact
- * recommendation and a copyable implementation example — the difference between
+ * recommendation and a copyable implementation example, the difference between
  * a finding a user can act on and one they will ignore.
  */
 export function IssueList({ issues }: { issues: readonly IssueView[] }) {

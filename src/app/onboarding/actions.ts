@@ -172,7 +172,7 @@ export async function completeOnboardingAction(
     .eq("id", context.user.id);
 
   // Register the trial. If Razorpay is not configured (local development), the
-  // project is still usable — we log it rather than blocking onboarding.
+  // project is still usable, we log it rather than blocking onboarding.
   if (isRazorpayConfigured() && !entitlements.subscription) {
     try {
       await startTrialSubscription({

@@ -37,7 +37,7 @@ interface AiScanState {
 /**
  * AI visibility scan handler.
  *
- * Never triggered by a page render — only by an explicit scan job — so a user
+ * Never triggered by a page render, only by an explicit scan job, so a user
  * refreshing the dashboard cannot spend money. Prompts are processed a few at a
  * time and the job re-queues itself, keeping each invocation short.
  */

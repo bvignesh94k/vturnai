@@ -130,7 +130,7 @@ export interface HeoScore extends CompositeScore {
 }
 
 /**
- * HEO — the unified V Score. Weights come from `HEO_WEIGHTS` and the formula
+ * HEO, the unified V Score. Weights come from `HEO_WEIGHTS` and the formula
  * string is generated from them so the displayed explanation can never drift
  * from the arithmetic.
  */

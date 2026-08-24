@@ -12,7 +12,7 @@ export const CANONICAL_ORIGIN = "https://vturnai.com";
  *
  * Order matters. An explicit `NEXT_PUBLIC_APP_URL` always wins, then the host's
  * own signals, and only a genuine local dev process may fall back to localhost
- * — a deployed build that guesses `localhost` publishes a whole site of
+ *, a deployed build that guesses `localhost` publishes a whole site of
  * unreachable canonical URLs, which is worse than guessing the wrong domain.
  */
 export function appUrl(): string {

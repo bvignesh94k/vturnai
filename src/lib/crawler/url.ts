@@ -3,7 +3,7 @@
  *
  * Two URLs that render the same page must collapse to one key, otherwise a
  * 500-URL budget is wasted on duplicates. These functions are pure and fully
- * unit tested — the crawler depends on them for both correctness and safety.
+ * unit tested, the crawler depends on them for both correctness and safety.
  */
 
 /** Query parameters that never change the rendered content. */

@@ -73,7 +73,7 @@ const FAQS = [
   {
     question: "Do I need my own AI provider API keys?",
     answer:
-      "The deployment supplies the provider keys. If a provider is not configured, that engine reports as unavailable rather than showing estimated data — we never invent a number to fill a gap.",
+      "The deployment supplies the provider keys. If a provider is not configured, that engine reports as unavailable rather than showing estimated data. We never invent a number to fill a gap.",
   },
   {
     question: "Is GST included?",

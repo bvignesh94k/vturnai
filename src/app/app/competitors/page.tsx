@@ -206,7 +206,7 @@ export default async function CompetitorsPage({
                       Named in {round(competitor.mentionRate, 0)}% of answers against your{" "}
                       {round(brandMentionRate, 0)}%, and recommended in{" "}
                       {round(competitor.recommendationRate, 0)}%. Engines are finding enough about
-                      them to state an opinion — and less about you.
+                      them to state an opinion, and less about you.
                     </p>
                   </div>
                 ))
@@ -238,7 +238,7 @@ export default async function CompetitorsPage({
                         .join(" and ")}. Comparison pages are quoted heavily by answer engines.`
                     : null,
                   aiData.summary && aiData.summary.engineConsistency < 60
-                    ? "You appear on some engines and not others. That is usually a source-coverage gap — strengthen your presence on the third-party sites those engines cite."
+                    ? "You appear on some engines and not others. That is usually a source-coverage gap: strengthen your presence on the third-party sites those engines cite."
                     : null,
                   "Add original data only you have. A single proprietary statistic is quoted far more often than a page of well-written description.",
                 ]

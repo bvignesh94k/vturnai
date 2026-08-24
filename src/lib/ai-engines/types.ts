@@ -1,7 +1,7 @@
 /**
  * The contract every AI engine adapter implements.
  *
- * Providers differ wildly in shape — OpenAI returns a Responses payload with
+ * Providers differ wildly in shape, OpenAI returns a Responses payload with
  * annotations, Gemini returns grounding metadata, Perplexity returns a chat
  * completion with a citations array. Everything is normalised into
  * `AIVisibilityResult` so metrics, storage and the UI never branch on provider.

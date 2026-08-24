@@ -166,7 +166,7 @@ export async function cancelSubscription(input: {
  * Verify a Razorpay webhook signature.
  *
  * HMAC-SHA256 over the raw request body with the webhook secret, compared in
- * constant time. The raw body must be used exactly as received — re-serialising
+ * constant time. The raw body must be used exactly as received, re-serialising
  * parsed JSON changes the bytes and invalidates the signature.
  */
 export function verifyWebhookSignature(input: {
@@ -221,7 +221,7 @@ export function mapRazorpayStatus(
     case "created":
       return "created";
     case "authenticated":
-      // A mandate is registered but the first charge has not happened yet —
+      // A mandate is registered but the first charge has not happened yet -
       // that is exactly what an active free trial looks like.
       return trialEnd && trialEnd.getTime() > now ? "trialing" : "authenticated";
     case "active":

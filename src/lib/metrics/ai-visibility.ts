@@ -1,7 +1,7 @@
 /**
  * AI visibility metric calculations.
  *
- * Every metric here has one definition, stated once, used everywhere — the
+ * Every metric here has one definition, stated once, used everywhere, the
  * dashboard, the reports and the API all call these functions. "Valid" always
  * means a response the engine actually returned; failed or skipped runs are
  * excluded from both numerator and denominator so an outage cannot look like a
@@ -30,7 +30,7 @@ export function validRuns(runs: readonly MeasurableRun[]): MeasurableRun[] {
 }
 
 /**
- * Mention Rate — valid AI responses containing the tracked brand, divided by
+ * Mention Rate, valid AI responses containing the tracked brand, divided by
  * total valid responses.
  */
 export function mentionRate(runs: readonly MeasurableRun[]): number {
@@ -39,7 +39,7 @@ export function mentionRate(runs: readonly MeasurableRun[]): number {
 }
 
 /**
- * Citation Rate — valid AI responses citing the tracked domain, divided by
+ * Citation Rate, valid AI responses citing the tracked domain, divided by
  * total valid responses.
  */
 export function citationRate(runs: readonly MeasurableRun[]): number {
@@ -48,7 +48,7 @@ export function citationRate(runs: readonly MeasurableRun[]): number {
 }
 
 /**
- * Recommendation Rate — responses that actively recommend the brand, divided by
+ * Recommendation Rate, responses that actively recommend the brand, divided by
  * valid responses.
  */
 export function recommendationRate(runs: readonly MeasurableRun[]): number {
@@ -57,12 +57,12 @@ export function recommendationRate(runs: readonly MeasurableRun[]): number {
 }
 
 /**
- * Prompt Coverage — the share of tracked prompts where the brand appears at
+ * Prompt Coverage, the share of tracked prompts where the brand appears at
  * least once on any engine.
  *
  * `totalTrackedPrompts` is passed explicitly so prompts that produced no valid
  * run at all (for example every engine failed) are still counted as tracked but
- * uncovered — that is the honest reading for the user.
+ * uncovered, that is the honest reading for the user.
  */
 export function promptCoverage(
   runs: readonly MeasurableRun[],
@@ -79,7 +79,7 @@ export function promptCoverage(
 }
 
 /**
- * AI Share of Voice — tracked brand mentions divided by mentions of the tracked
+ * AI Share of Voice, tracked brand mentions divided by mentions of the tracked
  * brand plus all tracked competitors.
  */
 export function shareOfVoice(runs: readonly MeasurableRun[]): number {
@@ -121,7 +121,7 @@ export function shareOfVoiceBreakdown(
 }
 
 /**
- * Engine Consistency — for a given prompt, the percentage of monitored engines
+ * Engine Consistency, for a given prompt, the percentage of monitored engines
  * that mention the brand; averaged across all prompts that produced valid runs.
  */
 export function engineConsistency(runs: readonly MeasurableRun[]): number {
@@ -142,7 +142,7 @@ export function engineConsistency(runs: readonly MeasurableRun[]): number {
 }
 
 /**
- * Citation Diversity — the number of distinct URLs on the tracked domain that
+ * Citation Diversity, the number of distinct URLs on the tracked domain that
  * AI engines have cited.
  */
 export function citationDiversity(runs: readonly MeasurableRun[]): number {
@@ -178,7 +178,7 @@ const ENGINE_VISIBILITY_WEIGHTS = {
 
 /**
  * A per-engine visibility score. Mention is the entry ticket, citation proves
- * the engine trusted a page, recommendation is what actually converts — so the
+ * the engine trusted a page, recommendation is what actually converts, so the
  * three are weighted rather than averaged flat.
  */
 export function engineVisibilityScore(input: {

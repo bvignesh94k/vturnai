@@ -1,7 +1,7 @@
 /**
  * Structured logging.
  *
- * Provider failures are never swallowed — they are logged with enough context
+ * Provider failures are never swallowed, they are logged with enough context
  * to diagnose, and surfaced to the user as a partial result ("4 of 5 engines
  * completed") rather than a silent zero.
  */

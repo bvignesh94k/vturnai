@@ -79,7 +79,7 @@ export default async function OpportunitiesPage({
     <div className="space-y-6">
       <PageHeader
         title="Opportunities"
-        description="Sorted by impact for the effort involved. Work top-down — this is the order that moves your V Score fastest."
+        description="Sorted by impact for the effort involved. Work top-down: this is the order that moves your V Score fastest."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -94,7 +94,7 @@ export default async function OpportunitiesPage({
           label="Completed"
           value={completed.length}
           format="raw"
-          footnote="Done — re-run an audit to confirm"
+          footnote="Done, re-run an audit to confirm"
         />
         <MetricCard
           metricKey="opportunityPriority"

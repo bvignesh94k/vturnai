@@ -10,7 +10,7 @@ import { startAiScanAction } from "@/app/app/actions";
  * visibility data exists.
  *
  * A row of five em dashes reads as "this product is broken", not "this measurement
- * has not run yet" — and it is the first thing a new account sees, immediately
+ * has not run yet", and it is the first thing a new account sees, immediately
  * after a set of website scores that did compute. One card that names the single
  * next action is more honest about the state and far more useful than five dead
  * tiles that each repeat the same absence.
@@ -180,7 +180,7 @@ function Shell({
   );
 }
 
-/** "ChatGPT, Gemini and Claude" — an Oxford-less list for inline prose. */
+/** "ChatGPT, Gemini and Claude", an Oxford-less list for inline prose. */
 function formatList(items: readonly string[]): string {
   if (items.length === 0) return "AI engines";
   if (items.length === 1) return items[0];

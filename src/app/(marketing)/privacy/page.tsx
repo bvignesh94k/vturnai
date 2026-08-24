@@ -26,7 +26,7 @@ const SECTIONS = [
     list: [
       "Account data: your name, email address and hashed password, managed by our authentication provider. We never store your password in a readable form.",
       "Project data: the website addresses, brand names, business descriptions, target countries, audiences and competitors you enter.",
-      "Crawl data: publicly accessible content from the websites you add — page HTML, metadata, headings, structured data, links and text. We only fetch what any search engine could fetch.",
+      "Crawl data: publicly accessible content from the websites you add, including page HTML, metadata, headings, structured data, links and text. We only fetch what any search engine could fetch.",
       "Measurement data: the prompts you track, the answers returned by AI engine APIs, and the metrics derived from them.",
       "Integration data: metrics retrieved from services you connect, such as Google Search Console, Bing Webmaster Tools, Google Analytics 4 and PageSpeed Insights.",
       "Billing data: subscription status and payment events from Razorpay. We never receive or store your card details.",
@@ -82,7 +82,7 @@ const SECTIONS = [
   {
     heading: "Your rights",
     body: [
-      "You can access, correct, export or delete your data from within the application, or by contacting us. Where a legal basis of consent applies — for example marketing email — you can withdraw it at any time without affecting your use of the service.",
+      "You can access, correct, export or delete your data from within the application, or by contacting us. Where a legal basis of consent applies (for example marketing email), you can withdraw it at any time without affecting your use of the service.",
     ],
   },
   {

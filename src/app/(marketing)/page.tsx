@@ -43,20 +43,20 @@ import { formatCurrencyINR } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Know How Visible Your Brand Is Across Google and AI Search",
   description:
-    "See whether ChatGPT, Gemini, Claude, Perplexity and Grok mention you, cite you, or recommend a competitor — alongside your Google and Bing visibility. V Turn AI scores SEO, AEO, GEO and HEO, then gives you one ranked list of what to fix first.",
+    "See whether ChatGPT, Gemini, Claude, Perplexity and Grok mention you, cite you, or recommend a competitor, alongside your Google and Bing visibility. V Turn AI scores SEO, AEO, GEO and HEO, then gives you one ranked list of what to fix first.",
   alternates: { canonical: "/" },
 };
 
 /**
  * These questions are rendered visibly below and reused in FAQPage schema.
- * Keeping one source guarantees the markup always matches the page — the same
+ * Keeping one source guarantees the markup always matches the page, the same
  * rule the AEO analyzer enforces on customers.
  */
 const FAQS = [
   {
     question: "What is AI visibility?",
     answer:
-      "AI visibility is how often AI answer engines mention your brand, cite your website and recommend you when someone asks a question in your category. It is the AI equivalent of a search ranking, except there is no results page to check — you have to measure it by asking the engines directly.",
+      "AI visibility is how often AI answer engines mention your brand, cite your website and recommend you when someone asks a question in your category. It is the AI equivalent of a search ranking, except there is no results page to check. You have to measure it by asking the engines directly.",
   },
   {
     question: "How does V Turn AI measure AI visibility?",
@@ -106,7 +106,7 @@ const CAPABILITIES = [
   {
     icon: <ActivityIcon />,
     title: "AI visibility monitoring",
-    body: "Track how often each engine mentions your brand, cites your domain and actively recommends you — per engine, per prompt, over time.",
+    body: "Track how often each engine mentions your brand, cites your domain and actively recommends you, per engine, per prompt, over time.",
   },
   {
     icon: <TargetIcon />,
@@ -116,7 +116,7 @@ const CAPABILITIES = [
   {
     icon: <GaugeIcon />,
     title: "Technical SEO audit",
-    body: "Crawl, indexability, titles, headings, structured data, internal links, Core Web Vitals — with severity, affected URLs and an exact fix.",
+    body: "Crawl, indexability, titles, headings, structured data, internal links, Core Web Vitals, with severity, affected URLs and an exact fix.",
   },
   {
     icon: <QuoteIcon />,
@@ -141,7 +141,7 @@ const CAPABILITIES = [
   {
     icon: <FileTextIcon />,
     title: "Client-ready reports",
-    body: "Executive summary, scores, engine breakdown, competitors, top issues and a recommended action plan — with data sources stated.",
+    body: "Executive summary, scores, engine breakdown, competitors, top issues and a recommended action plan, with data sources stated.",
   },
 ];
 
@@ -172,7 +172,7 @@ export default function HomePage() {
 
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground text-pretty">
                 Google and Bing are half the story. See whether ChatGPT, Gemini, Claude, Perplexity
-                and Grok mention you, cite you, or recommend a competitor instead — and get one
+                and Grok mention you, cite you, or recommend a competitor instead, and get one
                 ranked list of what to fix first.
               </p>
 
@@ -231,7 +231,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="How we score you"
           title="Four disciplines, one number you can act on"
-          description="Your V Score combines all four so you always know what to work on next — and we show you exactly how it was calculated."
+          description="Your V Score combines all four so you always know what to work on next, and we show you exactly how it was calculated."
         />
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -262,7 +262,7 @@ export default function HomePage() {
 
         <p className="mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground">
           Experience &amp; Authority makes up the remaining{" "}
-          {Math.round(HEO_WEIGHTS.experienceAuthority * 100)}% — evidence that identifiable experts
+          {Math.round(HEO_WEIGHTS.experienceAuthority * 100)}%: evidence that identifiable experts
           stand behind your content.
         </p>
       </Section>
@@ -272,7 +272,7 @@ export default function HomePage() {
         <SectionHeading
           eyebrow="What you get"
           title="Everything you need to be found, cited and chosen"
-          description="Built for owners, freelancers, in-house marketers and small agencies — not for a team of specialists."
+          description="Built for owners, freelancers, in-house marketers and small agencies, not for a team of specialists."
         />
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {CAPABILITIES.map((capability) => (
@@ -323,7 +323,7 @@ export default function HomePage() {
         </ol>
       </Section>
 
-      {/* Honesty section — a genuine differentiator, not a disclaimer */}
+      {/* Honesty section: a genuine differentiator, not a disclaimer */}
       <Section>
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
@@ -419,7 +419,7 @@ export default function HomePage() {
         </div>
       </Section>
 
-      {/* FAQ — visible content that matches the FAQPage schema above */}
+      {/* FAQ: visible content that matches the FAQPage schema above */}
       <Section>
         <SectionHeading eyebrow="Questions" title="Frequently asked questions" />
         <div className="mx-auto mt-10 max-w-3xl">

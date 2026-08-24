@@ -2,7 +2,7 @@
  * Prompt suggestion generation.
  *
  * Prompts are generated from what the site and its Search Console data actually
- * say — never from a generic template list. A suggestion the user does not
+ * say, never from a generic template list. A suggestion the user does not
  * recognise as their own business is a suggestion they will delete.
  */
 
@@ -118,7 +118,7 @@ function countryName(code: string): string {
 
 /**
  * Generate suggested prompts. The user reviews and edits these before any of
- * them become active — nothing here is executed automatically.
+ * them become active, nothing here is executed automatically.
  */
 export function generatePromptSuggestions(input: SuggestionInput): PromptSuggestion[] {
   const suggestions: PromptSuggestion[] = [];
@@ -212,7 +212,7 @@ export function generatePromptSuggestions(input: SuggestionInput): PromptSuggest
     });
     if (primary) {
       push({
-        promptText: `${competitor} vs other ${primary.toLowerCase()} — which is better?`,
+        promptText: `${competitor} vs other ${primary.toLowerCase()}, which is better?`,
         group: "comparison",
         intent: `Compare ${competitor} against the field`,
         topic: competitor,

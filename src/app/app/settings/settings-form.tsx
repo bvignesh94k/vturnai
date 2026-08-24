@@ -97,7 +97,7 @@ export function SettingsForm({
               disabled={!canWrite}
             />
             <p className="text-xs text-muted-foreground">
-              Comma separated. Add only names customers genuinely use — a loose alias inflates your
+              Comma separated. Add only names customers genuinely use: a loose alias inflates your
               mention rate and makes the number useless.
             </p>
           </div>

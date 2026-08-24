@@ -1,5 +1,5 @@
 /**
- * OpenAI adapter — the Responses API with web search enabled.
+ * OpenAI adapter, the Responses API with web search enabled.
  *
  * Important framing, enforced everywhere this data surfaces: this is an
  * observation of the OpenAI API, not a reading of the consumer ChatGPT product.

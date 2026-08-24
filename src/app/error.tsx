@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
  *
  * Shows what went wrong in plain language and gives two ways out. The digest is
  * surfaced because it is the id an operator needs to find the matching server
- * log — the message itself is deliberately not detailed in production.
+ * log, the message itself is deliberately not detailed in production.
  */
 export default function GlobalError({
   error,
@@ -28,7 +28,7 @@ export default function GlobalError({
 
         <h1 className="mt-6 text-2xl font-semibold tracking-tight">Something went wrong</h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          This page could not be loaded. The problem has been logged. Trying again often works — if
+          This page could not be loaded. The problem has been logged. Trying again often works. If
           it does not, the details below will help us find it.
         </p>
 

@@ -241,7 +241,7 @@ function escapeHtml(value: string): string {
 /**
  * Copyable starting points, never applied automatically.
  *
- * These are suggestions the user can take or ignore — the product does not
+ * These are suggestions the user can take or ignore, the product does not
  * rewrite anyone's content for them.
  */
 function buildProposals(
@@ -262,7 +262,7 @@ function buildProposals(
   if (!page.metaDescription || page.metaDescriptionLength < 70) {
     proposals.push({
       label: "Meta description",
-      value: `${truncate(subject, 60)} — what it is, who it is for, and what it costs. Written for ${brandName} customers.`,
+      value: `${truncate(subject, 60)}: what it is, who it is for, and what it costs. Written for ${brandName} customers.`,
       note: "Replace with the real benefit in 70–160 characters. This is a shape, not finished copy.",
     });
   }

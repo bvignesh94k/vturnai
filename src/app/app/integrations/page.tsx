@@ -72,7 +72,7 @@ export default async function IntegrationsPage({
       name: "Bing Webmaster Tools",
       vendor: "Microsoft",
       description:
-        "Traffic, keywords, crawl and index information from Bing — the index that also feeds Microsoft Copilot.",
+        "Traffic, keywords, crawl and index information from Bing, the index that also feeds Microsoft Copilot.",
       status: bing ? "connected" : isBingConfigured() ? "not_connected" : "configuration_required",
       statusMessage: isBingConfigured()
         ? (connectionByProvider.get("bing_webmaster")?.last_error ?? null)

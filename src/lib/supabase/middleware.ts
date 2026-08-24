@@ -53,8 +53,8 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
    * row genuinely exists.
    *
    * A valid JWT is not the same thing as a usable account: the row is created by
-   * a trigger on `auth.users`, so between sign-up and that row landing — or if
-   * the schema was never migrated — a user holds a good token with nothing
+   * a trigger on `auth.users`, so between sign-up and that row landing, or if
+   * the schema was never migrated, a user holds a good token with nothing
    * behind it. The page guards treat that state as signed out and send the
    * visitor to /login. If this redirect trusted the token alone it would send
    * them straight back, and the two would volley until the browser gave up with

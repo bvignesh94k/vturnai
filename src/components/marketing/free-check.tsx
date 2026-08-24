@@ -57,7 +57,7 @@ export function FreeVisibilityCheck() {
   const [data, setData] = React.useState<QuickCheckResponse["result"] | null>(null);
 
   /**
-   * `isLive` lets a caller abandon a result it no longer owns — an unmount, or
+   * `isLive` lets a caller abandon a result it no longer owns, an unmount, or
    * a second address arriving while the first is still in flight.
    */
   const runCheck = React.useCallback(
@@ -98,7 +98,7 @@ export function FreeVisibilityCheck() {
 
   /**
    * The hero hands an address over in `?url=`. Running it on arrival is the
-   * whole point of asking for it there — the visitor should land on their own
+   * whole point of asking for it there, the visitor should land on their own
    * result, not on an input they have to fill in a second time. The field is
    * seeded from the same value at initialisation, so this only fires the
    * request, and it does so off the effect body so the render that mounts the
@@ -226,7 +226,7 @@ export function FreeVisibilityCheck() {
           )}
 
           {/*
-            * The scores above answer "is my page well built?" — but the visitor
+            * The scores above answer "is my page well built?", but the visitor
             * arrived asking "does AI mention me?". These are the real questions
             * generated from their own page, shown unanswered on purpose: the
             * gap between seeing the question and knowing the answer is the
@@ -243,7 +243,7 @@ export function FreeVisibilityCheck() {
                     Your buyers are asking AI these questions right now
                   </h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    Generated from your own homepage. Notice that none of them name you — that is
+                    Generated from your own homepage. Notice that none of them name you, that is
                     the point. Whether you appear in the answer is the measurement.
                   </p>
                 </div>
@@ -276,7 +276,7 @@ export function FreeVisibilityCheck() {
                   <p className="mt-1 text-sm text-muted-foreground">
                     A trial asks these questions for real, crawls up to{" "}
                     {PRO_PLAN.limits.crawledUrls} URLs and tracks{" "}
-                    {PRO_PLAN.limits.activePrompts} prompts — so you find out whether it is you or a
+                    {PRO_PLAN.limits.activePrompts} prompts, so you find out whether it is you or a
                     competitor being recommended.
                   </p>
                 </div>

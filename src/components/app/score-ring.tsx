@@ -74,7 +74,7 @@ export function ScoreRing({
             className="font-semibold tabular-nums leading-none"
             style={{ fontSize: size * 0.29 }}
           >
-            {value === null ? "—" : round(safeValue, 0)}
+            {value === null ? "N/A" : round(safeValue, 0)}
           </span>
           {value !== null ? (
             <span

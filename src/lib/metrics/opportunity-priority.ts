@@ -18,7 +18,7 @@ import { clamp, round } from "@/lib/utils";
 
 export interface PriorityInput {
   severity: IssueSeverity;
-  /** 0–100 — how much fixing this is expected to move visibility. */
+  /** 0–100, how much fixing this is expected to move visibility. */
   visibilityImpact: number;
   affectedPages: number;
   /** Total pages in the crawl, used to scale `affectedPages` fairly. */
@@ -26,7 +26,7 @@ export interface PriorityInput {
   effort: EffortLevel;
   /** Search Console impressions attached to the affected URLs, when connected. */
   trafficPotential?: number | null;
-  /** 0–100 — how much this unlocks prompts the brand is currently absent from. */
+  /** 0–100, how much this unlocks prompts the brand is currently absent from. */
   aiPromptOpportunity?: number | null;
 }
 

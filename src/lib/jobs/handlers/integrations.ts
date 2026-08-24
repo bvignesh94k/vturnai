@@ -97,7 +97,7 @@ export async function handleAnalyticsSync(job: JobRow): Promise<void> {
 /**
  * PageSpeed scan.
  *
- * Only a handful of pages are measured per run — the API is slow and
+ * Only a handful of pages are measured per run, the API is slow and
  * quota-limited, and measuring 500 URLs would produce a large bill and very
  * little extra insight.
  */

@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
  * Live progress banner for a running crawl or scan.
  *
  * Polls the same status endpoint the onboarding screen uses, which also nudges
- * the job queue — so a user watching their scan keeps it moving even before a
+ * the job queue, so a user watching their scan keeps it moving even before a
  * cron schedule is configured.
  */
 export function ScanBanner({

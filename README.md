@@ -41,11 +41,11 @@ Production domain: `https://vturnai.com
 | **SEO** | Search Engine Optimization | Whether classic search engines can crawl, understand and rank the site | 30% |
 | **AEO** | Answer Engine Optimization | Whether a page has a passage worth quoting as a direct answer | 20% |
 | **GEO** | Generative Engine Optimization | Whether a generative engine can understand, trust and cite the brand | 35% |
-| **Experience & Authority** | — | Whether identifiable experts stand behind the content | 15% |
+| **Experience & Authority** |, | Whether identifiable experts stand behind the content | 15% |
 
 **HEO** (Hybrid Engine Optimization) is the unified score across all four. It is
 surfaced in the product as the **V Score**. The weights live in exactly one
-place — `src/lib/config/scoring.ts` — and the score card renders its breakdown
+place, `src/lib/config/scoring.ts`, and the score card renders its breakdown
 from the same object the calculation uses, so what a user reads is provably what
 was computed.
 
@@ -60,7 +60,7 @@ was computed.
   problems, canonical conflicts, thin content, broken internal links, orphan
   pages, HTTPS and mixed content, sitemap inconsistency and blocked AI crawlers.
 - **Scores** every page for AEO, GEO and Citation Readiness.
-- **Analyses the brand as an entity**, flagging contradictions between pages —
+- **Analyses the brand as an entity**, flagging contradictions between pages -
   two founding years, two phone numbers, two company names.
 - **Measures AI visibility** by sending tracked prompts to each engine's official
   developer API and analysing the answers.
@@ -167,7 +167,7 @@ labelled "configuration required" state rather than failing.
 2. From **Project Settings → API**, copy:
    - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
    - `anon` public key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (**server only** — this
+   - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (**server only**, this
      key bypasses Row Level Security and must never reach the browser)
 3. Under **Authentication → URL Configuration**, set:
    - Site URL: `http://localhost:3000` in development, `https://vturnai.com` in
@@ -175,7 +175,7 @@ labelled "configuration required" state rather than failing.
    - Redirect URLs: add `http://localhost:3000/api/auth/callback` and
      `https://vturnai.com/api/auth/callback`
 4. Under **Authentication → Providers**, enable Email. Decide whether to require
-   email confirmation — the sign-up flow handles both cases.
+   email confirmation, the sign-up flow handles both cases.
 
 ---
 
@@ -251,7 +251,7 @@ defaults, so a bad admin edit cannot unlock unlimited spend.
 
 Each provider is optional and configured at the deployment level, so no customer
 ever handles a provider secret. A missing key means that engine reports as
-unavailable — never estimated.
+unavailable, never estimated.
 
 | Engine | Variable | Where to get it | API used |
 | --- | --- | --- | --- |
@@ -306,7 +306,7 @@ returned to the browser.
 1. Verify the site in [Bing Webmaster Tools](https://www.bing.com/webmasters).
 2. **Settings → API access → API key**: generate a key.
 3. Either set `BING_WEBMASTER_API_KEY` for the whole deployment, or let each
-   user paste their own key under Integrations — a per-project key wins over the
+   user paste their own key under Integrations, a per-project key wins over the
    deployment key, and is encrypted before storage.
 
 ---
@@ -427,7 +427,7 @@ curl -X POST https://vturnai.com/api/cron/process-jobs \
 
 **Row Level Security** is enabled on every table. Users see only organizations
 they are members of, and only those organizations' projects. Derived analysis
-tables are read-only to clients — a compromised browser session cannot fabricate
+tables are read-only to clients, a compromised browser session cannot fabricate
 visibility data. `integration_credentials` has RLS enabled and *no policy at
 all*, which denies it to every browser-facing role.
 

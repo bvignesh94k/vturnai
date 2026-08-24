@@ -2,8 +2,8 @@
  * Brand and entity analysis.
  *
  * Builds one profile of the company from every crawled page, then compares the
- * pages against each other. Contradictions — two founding years, two phone
- * numbers, two company names — are the single most under-diagnosed cause of an
+ * pages against each other. Contradictions, two founding years, two phone
+ * numbers, two company names, are the single most under-diagnosed cause of an
  * AI engine declining to state anything confident about a brand.
  */
 
@@ -307,7 +307,7 @@ export function analyseEntity(input: {
       severity: contradiction.field === "organization_name" || contradiction.field === "founding_year" ? "high" : "medium",
       disciplines: ["geo"],
       whyItMatters:
-        "When your own site states two different facts about your company, an AI engine has no way to decide which is true — so it tends to say nothing about you at all.",
+        "When your own site states two different facts about your company, an AI engine has no way to decide which is true, so it tends to say nothing about you at all.",
       seoImpact: "Weaker brand entity recognition and knowledge panel eligibility.",
       aeoImpact: "Answer engines avoid stating facts they cannot corroborate.",
       geoImpact: "Directly reduces how confidently a generative engine will describe or recommend you.",
@@ -327,7 +327,7 @@ export function analyseEntity(input: {
       severity: "medium",
       disciplines: ["geo"],
       whyItMatters:
-        "The About page is where an engine — and a cautious buyer — goes to confirm you are a real business with real people.",
+        "The About page is where an engine, and a cautious buyer, goes to confirm you are a real business with real people.",
       seoImpact: "Weaker E-E-A-T signals across the whole site.",
       aeoImpact: "No authoritative source for questions about the company itself.",
       geoImpact: "Materially reduces the confidence with which an AI engine will describe you.",

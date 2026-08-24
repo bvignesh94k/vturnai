@@ -287,6 +287,53 @@ export const adminPlanConfigSchema = z.object({
   features: z.record(z.string(), z.boolean()).optional(),
 });
 
+// ---------------------------------------------------------------------------
+// Admin CRM: blog posts and scoped admin grants
+// ---------------------------------------------------------------------------
+
+export const blogSlugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(3, "Slug must be at least 3 characters.")
+  .max(120, "Slug is too long.")
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers and hyphens only.");
+
+export const blogPostSchema = z.object({
+  title: z.string().trim().min(3, "Enter a title.").max(200),
+  slug: blogSlugSchema,
+  excerpt: z.string().trim().max(300).optional(),
+  bodyMarkdown: z.string().trim().min(20, "Write at least a short body."),
+  coverImageUrl: z.union([z.url(), z.literal("")]).optional(),
+  authorName: z.string().trim().min(1).max(120).optional(),
+  isPublished: z.boolean().optional(),
+});
+
+export const blogPostUpdateSchema = blogPostSchema.partial().extend({ id: z.uuid() });
+
+export const adminResourceSchema = z.enum(["leads", "blog"]);
+
+export const adminGrantSchema = z.object({
+  email: z.email("Enter a valid email address.").trim().toLowerCase(),
+  resource: adminResourceSchema,
+});
+
+/** One resource granted to many emails at once, pasted one per line or comma-separated. */
+export const adminGrantBulkSchema = z.object({
+  emails: z
+    .string()
+    .trim()
+    .min(1, "Enter at least one email address.")
+    .transform((value) =>
+      value
+        .split(/[\n,]/)
+        .map((entry) => entry.trim().toLowerCase())
+        .filter((entry) => entry.length > 0),
+    )
+    .pipe(z.array(z.email("One of those addresses is not valid.")).min(1).max(200)),
+  resource: adminResourceSchema,
+});
+
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type CompleteOnboardingInput = z.infer<typeof completeOnboardingSchema>;

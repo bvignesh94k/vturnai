@@ -165,7 +165,7 @@ function normaliseForMatch(url: string): string {
  * How much fixing this is expected to move visibility, on 0–100.
  *
  * Severity carries most of the weight, with a bump for issues that block more
- * than one discipline — a page that is invisible to both search and AI engines
+ * than one discipline, a page that is invisible to both search and AI engines
  * is worth more than one that is merely untidy.
  */
 function estimateVisibilityImpact(severity: IssueSeverity, disciplines: readonly DisciplineDb[]): number {
