@@ -78,6 +78,10 @@ function toDate(value: unknown): Date | null {
 }
 
 function parseSubscription(payload: Record<string, unknown>): RazorpaySubscription {
+  let shortUrl = typeof payload["short_url"] === "string" ? payload["short_url"] : null;
+  if (shortUrl) {
+    shortUrl = shortUrl.replace(/[^\x00-\x7F]/g, "");
+  }
   return {
     id: typeof payload["id"] === "string" ? payload["id"] : "",
     planId: typeof payload["plan_id"] === "string" ? payload["plan_id"] : "",
@@ -88,7 +92,7 @@ function parseSubscription(payload: Record<string, unknown>): RazorpaySubscripti
     chargeAt: toDate(payload["charge_at"]),
     startAt: toDate(payload["start_at"]),
     endedAt: toDate(payload["ended_at"]),
-    shortUrl: typeof payload["short_url"] === "string" ? payload["short_url"] : null,
+    shortUrl,
     totalCount: typeof payload["total_count"] === "number" ? payload["total_count"] : 0,
   };
 }
