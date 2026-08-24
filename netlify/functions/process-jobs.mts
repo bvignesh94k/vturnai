@@ -13,7 +13,7 @@ interface ScheduledFunctionConfig {
  *
  * The crawl, scoring and AI-visibility work runs through a database-backed
  * queue, and a queue with nothing driving it is just a table. The schedule for
- * this lived in `vercel.json`, which Netlify never reads — so on this host the
+ * this lived in `vercel.json`, which Netlify never reads, so on this host the
  * worker had simply never run. This is that schedule, expressed in the form
  * Netlify does read.
  *

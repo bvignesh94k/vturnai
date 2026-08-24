@@ -2,7 +2,7 @@
   "name": "vturnai",
   "version": "1.0.0",
   "private": true,
-  "description": "V Turn AI — SEO, AEO, GEO and HEO visibility intelligence platform.",
+  "description": "V Turn AI: SEO, AEO, GEO and HEO visibility intelligence platform.",
   "engines": {
     "node": ">=20.9.0"
   },

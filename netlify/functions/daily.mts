@@ -9,7 +9,7 @@ interface ScheduledFunctionConfig {
 }
 
 /**
- * Nightly maintenance — scheduled recrawls, usage rollups and digest
+ * Nightly maintenance: scheduled recrawls, usage rollups and digest
  * notifications. Same arrangement as the queue tick: Netlify supplies the
  * schedule, the Next route holds the behaviour.
  */

@@ -22,7 +22,7 @@
 :root {
   --radius: 0.85rem;
 
-  /* Raw brand constants — reference these when a colour must be exact. */
+  /* Raw brand constants. Reference these when a colour must be exact. */
   --brand-indigo: #3730a3;
   --brand-violet: #7c3aed;
   --brand-cyan: #22d3ee;
@@ -69,7 +69,7 @@
   --sidebar-accent: #eeefff;
   --sidebar-accent-foreground: #3730a3;
 
-  /* Data visualisation ramp — brand-anchored, distinguishable in both themes. */
+  /* Data visualisation ramp: brand-anchored, distinguishable in both themes. */
   --chart-1: #4f46e5;
   --chart-2: #06b6d4;
   --chart-3: #7c3aed;
@@ -213,7 +213,7 @@
 
 @layer utilities {
   /* Signature ambient wash: the brand triad, bloomed. Deliberately low-contrast
-     so text stays readable, and never a hard-edged pattern — the identity is
+     so text stays readable, and never a hard-edged pattern. The identity is
      built from strokes and light, not boxes. */
   .bg-aurora {
     background-image:
@@ -259,7 +259,7 @@
       0 8px 24px -12px rgb(0 0 0 / 0.6);
   }
 
-  /* A hairline lit with the brand gradient — used to close hero sections. */
+  /* A hairline lit with the brand gradient, used to close hero sections. */
   .rule-brand {
     background-image: linear-gradient(
       90deg,

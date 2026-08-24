@@ -50,7 +50,7 @@ coverage/
 .vercel
 .env*
 
-# Local dev-server config — contains machine-specific absolute paths.
+# Local dev-server config, contains machine-specific absolute paths.
 .claude/launch.json
 
 # Logo design masters. The vector originals and exports that the app actually

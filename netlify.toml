@@ -5,7 +5,7 @@
   # Must match your custom domain (not the netlify.app domain).
   NEXT_PUBLIC_APP_URL = "https://vturnai.com"
 
-  # Razorpay's Key ID is the publishable half of the pair — the checkout modal
+  # Razorpay's Key ID is the publishable half of the pair. The checkout modal
   # cannot open without it in the browser, so NEXT_PUBLIC_RAZORPAY_KEY_ID puts it
   # in the bundle deliberately. Both names carry the same value, so scanning
   # either one flags output the build is meant to produce.
@@ -13,13 +13,13 @@
 
   # Turbopack's persistent module cache records the env values it resolved while
   # compiling, so server-only secrets legitimately appear inside it. That cache
-  # is internal build state — it is never served — but it sits under the build
+  # is internal build state (it is never served), but it sits under the build
   # directory, so the scanner reads it and blocks the deploy.
   #
   # Only the cache paths are exempt. The keys themselves stay scanned everywhere
   # else, which is the part that matters: if a service-role key ever reached a
   # client bundle or a served chunk, this build would still fail, exactly as it
-  # should. Omitting the keys instead — the other route out of this error — would
+  # should. Omitting the keys instead (the other route out of this error) would
   # buy a green build by switching off the check that would catch a real leak.
   SECRETS_SCAN_OMIT_PATHS = ".netlify/.next/cache/**,.next/cache/**,.next/dev/**"
 
