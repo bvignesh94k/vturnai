@@ -83,8 +83,8 @@ export async function signUpAction(
 
     log.info("Sign-up success", { userId: data.user?.id, hasSession: !!data.session });
 
-    // With email confirmation enabled, no session is returned until the link is
-    // clicked. Tell the user that plainly rather than dropping them on a login page.
+    // Always show a notice for now. Redirect should happen after user sees the message.
+    // With email confirmation enabled, no session is returned until the link is clicked.
     if (!data.session) {
       return {
         notice:
@@ -92,7 +92,10 @@ export async function signUpAction(
       };
     }
 
-    redirect("/onboarding");
+    // User has immediate session access - redirect will happen on client side via JavaScript
+    return {
+      notice: "Account created successfully! Redirecting to onboarding...",
+    };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
     log.error("Sign-up exception", { error: errorMessage });
