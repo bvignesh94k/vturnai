@@ -37,51 +37,67 @@ export async function signUpAction(
   _previous: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
-  const requestHeaders = await headers();
-  const limit = await consumeRateLimit(
-    RATE_LIMITS.authAction,
-    clientIpFromHeaders(requestHeaders),
-  );
-  if (!limit.allowed) {
-    return { error: "Too many attempts. Please wait a few minutes and try again." };
+  try {
+    const requestHeaders = await headers();
+    const limit = await consumeRateLimit(
+      RATE_LIMITS.authAction,
+      clientIpFromHeaders(requestHeaders),
+    );
+    if (!limit.allowed) {
+      return { error: "Too many attempts. Please wait a few minutes and try again." };
+    }
+
+    const fullName = formData.get("fullName");
+    const email = formData.get("email");
+    const password = formData.get("password");
+    const marketingOptIn = formData.get("marketingOptIn");
+
+    log.info("Sign-up attempt", { fullName, email, marketingOptIn });
+
+    const parsed = signUpSchema.safeParse({
+      fullName,
+      email,
+      password,
+      marketingOptIn: marketingOptIn === "on",
+    });
+
+    if (!parsed.success) {
+      log.warn("Sign-up validation failed", { issues: parsed.error.issues });
+      return { fieldErrors: fieldErrorsFrom(parsed.error.issues) };
+    }
+
+    const supabase = await createServerSupabaseClient();
+    const { data, error } = await supabase.auth.signUp({
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: {
+        data: { full_name: parsed.data.fullName, marketing_opt_in: parsed.data.marketingOptIn },
+        emailRedirectTo: absoluteUrl("/api/auth/callback"),
+      },
+    });
+
+    if (error) {
+      log.warn("Sign-up failed", { message: error.message, code: error.status });
+      return { error: error.message };
+    }
+
+    log.info("Sign-up success", { userId: data.user?.id, hasSession: !!data.session });
+
+    // With email confirmation enabled, no session is returned until the link is
+    // clicked. Tell the user that plainly rather than dropping them on a login page.
+    if (!data.session) {
+      return {
+        notice:
+          "Check your inbox. We have sent a confirmation link. Open it to finish creating your account.",
+      };
+    }
+
+    redirect("/onboarding");
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+    log.error("Sign-up exception", { error: errorMessage });
+    return { error: errorMessage };
   }
-
-  const parsed = signUpSchema.safeParse({
-    fullName: formData.get("fullName"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-    marketingOptIn: formData.get("marketingOptIn") === "on",
-  });
-
-  if (!parsed.success) {
-    return { fieldErrors: fieldErrorsFrom(parsed.error.issues) };
-  }
-
-  const supabase = await createServerSupabaseClient();
-  const { data, error } = await supabase.auth.signUp({
-    email: parsed.data.email,
-    password: parsed.data.password,
-    options: {
-      data: { full_name: parsed.data.fullName, marketing_opt_in: parsed.data.marketingOptIn },
-      emailRedirectTo: absoluteUrl("/api/auth/callback"),
-    },
-  });
-
-  if (error) {
-    log.warn("Sign-up failed", { message: error.message });
-    return { error: error.message };
-  }
-
-  // With email confirmation enabled, no session is returned until the link is
-  // clicked. Tell the user that plainly rather than dropping them on a login page.
-  if (!data.session) {
-    return {
-      notice:
-        "Check your inbox. We have sent a confirmation link. Open it to finish creating your account.",
-    };
-  }
-
-  redirect("/onboarding");
 }
 
 export async function signInAction(
