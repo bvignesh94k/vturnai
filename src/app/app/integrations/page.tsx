@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { getEngineCoverage } from "@/lib/ai-engines/coverage";
 import { EngineCoverageBoard } from "@/components/app/engine-coverage";
-import { isGoogleOAuthConfigured } from "@/lib/integrations/google-oauth";
+import { isGoogleOAuthConfigured, isGoogleOAuthVerified } from "@/lib/integrations/google-oauth";
 import { isPagespeedConfigured } from "@/lib/integrations/pagespeed";
 import { isBingConfigured } from "@/lib/integrations/bing";
 import { isEncryptionConfigured } from "@/lib/security/encryption";
@@ -46,6 +46,22 @@ export default async function IntegrationsPage({
 
   const connectionByProvider = new Map((connections ?? []).map((row) => [row.provider, row]));
 
+  /**
+   * A customer who has not connected yet must never be sent into Google's
+   * unverified-app warning: to anyone who has not seen an app mid-review
+   * before, "you shouldn't use this" reads as a phishing block, and that
+   * first impression does not come back. The Connect button for Search
+   * Console and GA4 is withheld until GOOGLE_OAUTH_VERIFIED is flipped on,
+   * which should happen the day Google's verification centre shows this app
+   * as verified. An account that is already connected, most likely the
+   * developer's own, having clicked through Google's "Advanced" bypass
+   * during testing, is left completely untouched by this gate.
+   */
+  const googleReviewPending = isGoogleOAuthConfigured() && !isGoogleOAuthVerified();
+  const gscAwaitingReview = googleReviewPending && !gsc;
+  const ga4AwaitingReview = googleReviewPending && !ga4;
+  const REVIEW_PENDING_MESSAGE =
+    "This connection is completing Google's security review, expected within a few weeks. Nothing is needed from you.";
 
   const searchCards: IntegrationCard[] = [
     {
@@ -56,15 +72,19 @@ export default async function IntegrationsPage({
         "Clicks, impressions, CTR, average position, queries, pages, countries and devices. Powers striking-distance and low-CTR opportunities.",
       status: !isGoogleOAuthConfigured()
         ? "configuration_required"
-        : gsc
-          ? "connected"
-          : (connectionByProvider.get("google_search_console")?.status ?? "not_connected"),
+        : gscAwaitingReview
+          ? "not_connected"
+          : gsc
+            ? "connected"
+            : (connectionByProvider.get("google_search_console")?.status ?? "not_connected"),
       statusMessage: !isGoogleOAuthConfigured()
         ? "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are not set on this deployment."
-        : (connectionByProvider.get("google_search_console")?.last_error ?? null),
+        : gscAwaitingReview
+          ? REVIEW_PENDING_MESSAGE
+          : (connectionByProvider.get("google_search_console")?.last_error ?? null),
       displayName: gsc?.site_url ?? connectionByProvider.get("google_search_console")?.display_name ?? null,
       lastSyncedAt: gsc?.last_synced_at ?? null,
-      kind: "oauth",
+      kind: gscAwaitingReview ? "server_key" : "oauth",
       canSync: Boolean(gsc),
     },
     {
@@ -100,22 +120,26 @@ export default async function IntegrationsPage({
       // authorised but no property has been verified yet.
       status: !isGoogleOAuthConfigured()
         ? "configuration_required"
-        : ga4
-          ? "connected"
-          : (connectionByProvider.get("google_analytics")?.status ?? "not_connected"),
+        : ga4AwaitingReview
+          ? "not_connected"
+          : ga4
+            ? "connected"
+            : (connectionByProvider.get("google_analytics")?.status ?? "not_connected"),
       statusMessage: !isGoogleOAuthConfigured()
         ? "Google OAuth is not configured on this deployment."
-        : (connectionByProvider.get("google_analytics")?.last_error ??
-          (connectionByProvider.get("google_analytics")?.status === "configuration_required"
-            ? "Google account connected. Choose which property to report on."
-            : null)),
+        : ga4AwaitingReview
+          ? REVIEW_PENDING_MESSAGE
+          : (connectionByProvider.get("google_analytics")?.last_error ??
+            (connectionByProvider.get("google_analytics")?.status === "configuration_required"
+              ? "Google account connected. Choose which property to report on."
+              : null)),
       displayName:
         ga4?.property_name ??
         ga4?.property_id ??
         connectionByProvider.get("google_analytics")?.display_name ??
         null,
       lastSyncedAt: ga4?.last_synced_at ?? null,
-      kind: "oauth",
+      kind: ga4AwaitingReview ? "server_key" : "oauth",
       canSync: Boolean(ga4),
     },
     {

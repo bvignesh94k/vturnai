@@ -29,6 +29,28 @@ export function isGoogleOAuthConfigured(): boolean {
   return Boolean(process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim());
 }
 
+/**
+ * Whether Google has approved this app's sensitive-scope verification.
+ *
+ * Being configured and being verified are different facts. A configured but
+ * unverified app can still request the OAuth grant, but Google shows every
+ * user who is not the developer a page reading "you shouldn't use this" -
+ * indistinguishable from a phishing warning to someone who has never seen an
+ * app in review before. Sending real customers into that flow costs more
+ * trust than the feature is worth until the review actually clears, so the
+ * Connect button for Search Console and GA4 stays hidden behind this flag
+ * rather than behind whether OAuth happens to be configured.
+ *
+ * Flip to "true" in the deployment's environment once Google's Auth Platform
+ * verification centre shows the app as verified, then redeploy. The developer
+ * can still exercise the real flow at any time by clicking through Google's
+ * own "Advanced -> Go to (unsafe)" link, unaffected by this flag - it only
+ * changes what customers are offered, not whether the OAuth route works.
+ */
+export function isGoogleOAuthVerified(): boolean {
+  return process.env.GOOGLE_OAUTH_VERIFIED?.trim().toLowerCase() === "true";
+}
+
 export function googleRedirectUri(integration: GoogleIntegration): string {
   return absoluteUrl(
     integration === "searchConsole"
