@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Geist_Mono, Sora } from "next/font/google";
+import { GoogleTagManager } from "@next/third-parties/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -90,7 +91,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${figtree.variable} ${sora.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
+      {/*
+        GoogleTagManager (the official Next.js package) places the loader
+        script in <head> on every route through this one root layout,
+        marketing, auth, the dashboard, admin. It does not add the <noscript>
+        fallback GTM also calls for, so that is added by hand directly below,
+        first inside <body>, matching Google's own placement instructions.
+      */}
+      <GoogleTagManager gtmId="GTM-5FS8ZGQ5" />
       <body className="antialiased">
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-5FS8ZGQ5"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+            title="Google Tag Manager"
+          />
+        </noscript>
         <ThemeProvider>
           <TooltipProvider>
             <a
