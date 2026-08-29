@@ -75,41 +75,36 @@ export function AiActivationChecklist({
 
   const steps: Step[] = [
     {
-      state: missing.length === 0 ? "done" : "blocked",
-      title: `Connect AI engines: ${connected.length} of ${providerStatuses.length}`,
+      /**
+       * Engine coverage is something we operate, not something the customer
+       * configures. Provider keys live on the deployment, so naming an
+       * environment variable here asks a marketer to do something they have no
+       * access to and no reason to understand. State the coverage, explain what
+       * it means for their reading, and leave it there.
+       */
+      state: "done",
+      title: `Engines covering your market: ${connected.length} of ${providerStatuses.length}`,
       detail:
         missing.length === 0 ? (
-          <p>Every engine we support is authorised. Nothing is missing from your coverage.</p>
+          <p>
+            Every engine we support is live, so your reading covers the whole market we can
+            observe.
+          </p>
         ) : (
           <>
             <p>
-              An engine without a key is not a zero, it is a blank. We never estimate a number to
-              fill the gap, so each missing engine is a part of the market you cannot see at all.
+              A missing engine is a blank, not a zero. We never estimate a number to fill the gap,
+              so {missing.map((status) => status.name).join(" and ")}{" "}
+              {missing.length === 1 ? "is" : "are"} left out of your scores entirely rather than
+              counted against you.
             </p>
-            <ul className="mt-2 space-y-1">
-              {missing.map((status) => (
-                <li key={status.id} className="flex flex-wrap items-baseline gap-x-2">
-                  <span className="font-medium text-foreground">{status.name}</span>
-                  {status.missingEnvKeys.length > 0 ? (
-                    <code className="rounded bg-secondary px-1.5 py-0.5 text-[11px]">
-                      {status.missingEnvKeys.join(", ")}
-                    </code>
-                  ) : (
-                    <span className="text-xs">{status.message}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
+            <p className="mt-2 text-xs">
+              We are working on adding{" "}
+              {missing.length === 1 ? "this engine" : "these engines"}. Nothing is needed from you.
+            </p>
           </>
         ),
-      action:
-        missing.length === 0 ? null : (
-          <Button size="sm" variant="outline" asChild>
-            <Link href="/app/integrations">
-              Add the missing keys <ArrowRightIcon className="size-3.5" />
-            </Link>
-          </Button>
-        ),
+      action: null,
     },
     {
       state: activePrompts === 0 ? "blocked" : suggestedPrompts > 0 ? "ready" : "done",

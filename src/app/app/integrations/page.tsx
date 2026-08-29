@@ -4,7 +4,7 @@ import { IntegrationsBoard } from "@/app/app/integrations/integrations-board";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { ENGINES, ENGINE_IDS } from "@/lib/config/engines";
-import { getProviderStatuses } from "@/lib/ai-engines/registry";
+import { getEngineHealth } from "@/lib/ai-engines/health";
 import { isGoogleOAuthConfigured } from "@/lib/integrations/google-oauth";
 import { isPagespeedConfigured } from "@/lib/integrations/pagespeed";
 import { isBingConfigured } from "@/lib/integrations/bing";
@@ -45,7 +45,7 @@ export default async function IntegrationsPage({
   ]);
 
   const connectionByProvider = new Map((connections ?? []).map((row) => [row.provider, row]));
-  const providerStatuses = getProviderStatuses();
+
 
   const searchCards: IntegrationCard[] = [
     {
@@ -135,20 +135,54 @@ export default async function IntegrationsPage({
     },
   ];
 
+  /**
+   * Engine cards report what each engine last *did*, not whether a key exists.
+   * A credential can be revoked or out of quota and still look configured, so
+   * "connected" here means the engine actually answered.
+   *
+   * Nothing in this section names an environment variable: these are the
+   * operator's credentials, and a customer can neither see nor fix them.
+   */
+  const engineHealth = await getEngineHealth(project.id);
+
   const engineCards: IntegrationCard[] = ENGINE_IDS.map((engineId) => {
-    const status = providerStatuses.find((entry) => entry.id === engineId);
     const engine = ENGINES[engineId];
+    const health = engineHealth.find((entry) => entry.engineId === engineId);
+
+    const status =
+      health?.state === "answering"
+        ? ("connected" as const)
+        : health?.state === "failing"
+          ? ("error" as const)
+          : health?.state === "untested"
+            ? ("connected" as const)
+            : ("not_connected" as const);
+
+    const statusMessage =
+      health?.state === "failing"
+        ? health.failureSummary
+        : health?.state === "unavailable"
+          ? `${engine.name} is not available on this deployment, so it is left out of your scores rather than counted as zero.`
+          : null;
+
+    const displayName =
+      health?.state === "answering"
+        ? "Answering scans"
+        : health?.state === "untested"
+          ? "Ready, not yet used"
+          : health?.state === "failing"
+            ? "Not answering"
+            : null;
+
     return {
       provider: engineId,
       name: engine.name,
       vendor: engine.vendor,
       description: engine.observationNote,
-      status: status?.configured ? "connected" : "configuration_required",
-      statusMessage: status?.configured
-        ? null
-        : (status?.message ?? `${engine.envKeys.join(", ")} is not set on this deployment.`),
-      displayName: status?.configured ? "Configured on this deployment" : null,
-      lastSyncedAt: null,
+      status,
+      statusMessage,
+      displayName,
+      lastSyncedAt: health?.lastAttemptAt?.toISOString() ?? null,
       kind: "server_key",
       canSync: false,
     };
