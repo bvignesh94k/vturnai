@@ -33,6 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <AppShell
+      isPlatformAdmin={context.isPlatformAdmin}
       projectSelector={
         <ProjectSelector
           projects={context.projects.map((project) => ({

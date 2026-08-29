@@ -81,6 +81,25 @@ function planCodeOf(value: string | null | undefined): PlanCode {
 export async function getEntitlements(organizationId: string): Promise<Entitlements> {
   const supabase = createServiceRoleClient();
 
+  /**
+   * An organisation owned by a platform admin is never gated.
+   *
+   * Platform admins operate the product: they need every feature reachable to
+   * support customers and to see what a paying account sees, and blocking the
+   * operator's own dashboard behind a lapsed trial helps nobody. Resolved here
+   * rather than at each call site because every limit, quota and billing check
+   * in the product funnels through this one function, including the ones that
+   * run inside background jobs where there is no session to inspect.
+   *
+   * Deliberately keyed on membership rather than on a hardcoded address, so
+   * promoting or demoting an operator is a `platform_role` change and nothing
+   * else. `is_platform_admin` is the same predicate the database's own RLS
+   * policies use, so UI access and data access cannot drift apart.
+   */
+  if (await isPlatformAdminOrganization(organizationId)) {
+    return buildUnlimitedEntitlements(organizationId);
+  }
+
   const [{ data: subscription }, { data: planConfigs }] = await Promise.all([
     supabase
       .from("subscriptions")
@@ -141,6 +160,72 @@ export async function getEntitlements(organizationId: string): Promise<Entitleme
   }
 
   return entitlements;
+}
+
+/** True when any member of this organisation is a platform admin. */
+async function isPlatformAdminOrganization(organizationId: string): Promise<boolean> {
+  const supabase = createServiceRoleClient();
+  const { data } = await supabase
+    .from("organization_members")
+    .select("user_id, profiles!inner(platform_role)")
+    .eq("organization_id", organizationId)
+    .eq("profiles.platform_role", "admin")
+    .limit(1);
+
+  return (data ?? []).length > 0;
+}
+
+/**
+ * Entitlements for an operator's own workspace.
+ *
+ * Every limit is `Number.MAX_SAFE_INTEGER` rather than a large round number so
+ * nothing has to guess where a ceiling sits, and every feature flag is on. The
+ * status reads `active` with no trial and no end date, which is what keeps the
+ * trial gate, the billing banner and the upgrade prompts from ever appearing.
+ */
+function buildUnlimitedEntitlements(organizationId: string): Entitlements {
+  const unlimited = Number.MAX_SAFE_INTEGER;
+
+  return {
+    organizationId,
+    planCode: DEFAULT_PLAN_CODE,
+    planName: "Platform administrator",
+    priceMinor: 0,
+    currency: PLANS[DEFAULT_PLAN_CODE].currency,
+    trialDays: 0,
+    status: "active",
+    isActive: true,
+    isTrialing: false,
+    trialEndsAt: null,
+    currentPeriodEnd: null,
+    daysRemainingInTrial: null,
+    cancelAtPeriodEnd: false,
+    limits: {
+      projects: unlimited,
+      crawledUrls: unlimited,
+      activePrompts: unlimited,
+      competitors: unlimited,
+      scheduledAiScansPerMonth: unlimited,
+      manualAiScansPerMonth: unlimited,
+      aiPromptExecutionsPerMonth: unlimited,
+      pagespeedRunsPerMonth: unlimited,
+      reportsPerMonth: unlimited,
+      websiteAuditsPerMonth: unlimited,
+    },
+    features: {
+      manualAudits: true,
+      searchConsole: true,
+      bingWebmaster: true,
+      googleAnalytics: true,
+      pagespeed: true,
+      aiVisibility: true,
+      competitorAnalysis: true,
+      contentOptimizer: true,
+      reports: true,
+      apiAccess: true,
+    },
+    subscription: null,
+  };
 }
 
 export class BillingRequiredError extends Error {

@@ -89,11 +89,14 @@ export function AppSidebar({
   accountControls,
   mobileOpen,
   onMobileClose,
+  isPlatformAdmin = false,
 }: {
   projectSelector: React.ReactNode;
   accountControls: React.ReactNode;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  /** Operators are exempt from billing, so that entry is hidden for them. */
+  isPlatformAdmin?: boolean;
 }) {
   const pathname = usePathname();
   const activeHref = activeNavHref(pathname);
@@ -153,7 +156,10 @@ export function AppSidebar({
         {/* Navigation */}
         <nav className="scrollbar-thin flex-1 overflow-y-auto px-2 py-3">
           {NAV_GROUPS.map((group) => {
-            const items = NAV_ITEMS.filter((item) => item.group === group.key);
+            const items = NAV_ITEMS.filter(
+              (item) =>
+                item.group === group.key && !(isPlatformAdmin && item.hideForPlatformAdmin),
+            );
             if (items.length === 0) return null;
 
             return (

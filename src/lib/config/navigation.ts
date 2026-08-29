@@ -13,6 +13,14 @@ export interface NavItem {
   icon: string;
   description: string;
   group: "overview" | "analyse" | "act" | "account";
+  /**
+   * Hidden from platform administrators.
+   *
+   * An operator's workspace is never billed, so a Billing page offering to
+   * charge them a plan they are already exempt from is noise at best and
+   * confusing at worst.
+   */
+  hideForPlatformAdmin?: boolean;
 }
 
 export const NAV_GROUPS = [
@@ -106,6 +114,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: "CreditCard",
     description: "Plan, usage and invoices",
     group: "account",
+    hideForPlatformAdmin: true,
   },
   {
     href: "/app/settings",

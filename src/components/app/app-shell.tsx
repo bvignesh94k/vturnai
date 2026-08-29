@@ -18,11 +18,13 @@ export function AppShell({
   projectSelector,
   accountControls,
   notifications,
+  isPlatformAdmin = false,
   children,
 }: {
   projectSelector: React.ReactNode;
   accountControls: React.ReactNode;
   notifications: React.ReactNode;
+  isPlatformAdmin?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -38,6 +40,7 @@ export function AppShell({
         accountControls={accountControls}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
+        isPlatformAdmin={isPlatformAdmin}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
