@@ -64,3 +64,6 @@ vturnai-backfill-profiles.sql
 
 # Local Supabase CLI cache, not project content.
 supabase/.temp/
+
+# Deploy-script state (server-local, never committed)
+.deploy-lockfile.sha256

@@ -46,10 +46,21 @@ else
     || fail "cannot fast-forward. The server has commits that are not on origin; run 'git reset --hard origin/${BRANCH}' to discard them."
 fi
 
-# --- 3. Install dependencies only when the lockfile moved -------------------
-if ! git diff --quiet "${LOCAL}" HEAD -- package-lock.json package.json 2>/dev/null; then
-  say "Lockfile changed — installing dependencies"
+# --- 3. Install dependencies only when the lockfile actually changed --------
+# Compared against a checksum stamp from the last successful install, not
+# against git history. Diffing commit ranges silently skips the install
+# whenever the working tree is already on the target commit before this script
+# runs, which is exactly what happens after a manual `git pull` — this is what
+# broke the @next/third-parties deploy on 2026-08-29: the package was pulled,
+# node_modules was never updated, and the build failed on a missing module.
+LOCKFILE_STAMP=".deploy-lockfile.sha256"
+CURRENT_HASH="$(sha256sum package-lock.json | cut -d' ' -f1)"
+STORED_HASH="$(cat "$LOCKFILE_STAMP" 2>/dev/null || true)"
+
+if [[ "$CURRENT_HASH" != "$STORED_HASH" ]]; then
+  say "package-lock.json changed since the last install — running npm ci"
   npm ci || fail "npm ci failed"
+  echo "$CURRENT_HASH" > "$LOCKFILE_STAMP"
 else
   say "Dependencies unchanged — skipping install"
 fi
