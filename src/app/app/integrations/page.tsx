@@ -73,10 +73,16 @@ export default async function IntegrationsPage({
       vendor: "Microsoft",
       description:
         "Traffic, keywords, crawl and index information from Bing, the index that also feeds Microsoft Copilot.",
-      status: bing ? "connected" : isBingConfigured() ? "not_connected" : "configuration_required",
-      statusMessage: isBingConfigured()
-        ? (connectionByProvider.get("bing_webmaster")?.last_error ?? null)
-        : "Add a Bing Webmaster API key to connect.",
+      // A `bing_connections` row is only written after the key has been proven
+      // against Bing's own site list, so its presence is real evidence. Absent
+      // that, fall through to the recorded status rather than assuming a
+      // deployment key means this project is connected.
+      status: bing
+        ? "connected"
+        : (connectionByProvider.get("bing_webmaster")?.status ?? "not_connected"),
+      statusMessage:
+        connectionByProvider.get("bing_webmaster")?.last_error ??
+        (isBingConfigured() ? null : "Add your Bing Webmaster API key to connect."),
       displayName: bing?.site_url ?? null,
       lastSyncedAt: bing?.last_synced_at ?? null,
       kind: "api_key",
@@ -88,11 +94,26 @@ export default async function IntegrationsPage({
       vendor: "Google",
       description:
         "Optional. Organic sessions, landing pages, engagement, key events, and the AI referral traffic report.",
-      status: ga4 ? "connected" : isGoogleOAuthConfigured() ? "not_connected" : "configuration_required",
-      statusMessage: isGoogleOAuthConfigured()
-        ? (connectionByProvider.get("google_analytics")?.last_error ?? null)
-        : "Google OAuth is not configured on this deployment.",
-      displayName: ga4?.property_name ?? ga4?.property_id ?? null,
+      // An `analytics_connections` row is only written once the chosen property
+      // has answered a real Data API request. Before that the recorded status
+      // carries the truth: `configuration_required` means the Google account is
+      // authorised but no property has been verified yet.
+      status: !isGoogleOAuthConfigured()
+        ? "configuration_required"
+        : ga4
+          ? "connected"
+          : (connectionByProvider.get("google_analytics")?.status ?? "not_connected"),
+      statusMessage: !isGoogleOAuthConfigured()
+        ? "Google OAuth is not configured on this deployment."
+        : (connectionByProvider.get("google_analytics")?.last_error ??
+          (connectionByProvider.get("google_analytics")?.status === "configuration_required"
+            ? "Google account connected. Choose which property to report on."
+            : null)),
+      displayName:
+        ga4?.property_name ??
+        ga4?.property_id ??
+        connectionByProvider.get("google_analytics")?.display_name ??
+        null,
       lastSyncedAt: ga4?.last_synced_at ?? null,
       kind: "oauth",
       canSync: Boolean(ga4),

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  connectAnalyticsAction,
+  selectAnalyticsPropertyAction,
   connectBingAction,
   connectGoogleAction,
   disconnectIntegrationAction,
@@ -206,12 +206,13 @@ export function IntegrationsBoard({
                         <Input id="bing-site" name="siteUrl" required placeholder="https://yourdomain.com" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="bing-key">API key (optional)</Label>
+                        <Label htmlFor="bing-key">API key</Label>
                         <Input
                           id="bing-key"
                           name="apiKey"
                           type="password"
-                          placeholder="Leave blank to use the deployment key"
+                          required
+                          placeholder="Paste your Bing Webmaster API key"
                           autoComplete="off"
                         />
                       </div>
@@ -220,39 +221,30 @@ export function IntegrationsBoard({
                         Connect
                       </Button>
                       <p className="text-xs text-muted-foreground sm:col-span-3">
-                        Generate a key in Bing Webmaster Tools under Settings → API access. It is
-                        encrypted before storage and never returned to the browser.
+                        Generate a key in Bing Webmaster Tools under Settings → API access. We ask
+                        Bing which sites the key covers and only connect if yours is among them. The
+                        key is encrypted before storage and never returned to the browser.
                       </p>
                     </form>
                   ) : null}
 
-                  {/* GA4 property form */}
+                  {/* GA4 property picker. Only reachable once the Google
+                      account is authorised, because the list comes from that
+                      account rather than from anything the user can type. */}
                   {card.provider === "google_analytics" &&
-                  card.status === "not_connected" &&
+                  card.status === "configuration_required" &&
                   canWrite ? (
-                    <form
-                      action={(formData) => {
+                    <Ga4PropertyPicker
+                      projectId={projectId}
+                      pending={pending}
+                      onSubmit={(property) => {
+                        const formData = new FormData();
                         formData.set("projectId", projectId);
-                        run(connectAnalyticsAction, formData);
+                        formData.set("propertyId", property.propertyId);
+                        formData.set("propertyName", property.displayName);
+                        run(selectAnalyticsPropertyAction, formData);
                       }}
-                      className="mt-4 grid gap-3 border-t pt-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
-                    >
-                      <div className="space-y-2">
-                        <Label htmlFor="ga4-property">GA4 property ID</Label>
-                        <Input id="ga4-property" name="propertyId" required placeholder="123456789" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="ga4-name">Label (optional)</Label>
-                        <Input id="ga4-name" name="propertyName" placeholder="Main website" />
-                      </div>
-                      <Button type="submit" variant="outline" disabled={pending}>
-                        Save property
-                      </Button>
-                      <p className="text-xs text-muted-foreground sm:col-span-3">
-                        Connect the Google account above first, then enter the numeric property ID
-                        from GA4 Admin → Property Settings.
-                      </p>
-                    </form>
+                    />
                   ) : null}
                 </CardContent>
               </Card>
@@ -297,6 +289,108 @@ export function IntegrationsBoard({
           })}
         </div>
       </section>
+    </div>
+  );
+}
+
+interface Ga4PropertyOption {
+  propertyId: string;
+  displayName: string;
+  accountName: string;
+}
+
+/**
+ * Property picker for GA4.
+ *
+ * Deliberately offers no free-text field. Every option comes back from Google
+ * for the account the user just authorised, so a property they cannot read is
+ * never selectable in the first place.
+ */
+function Ga4PropertyPicker({
+  projectId,
+  pending,
+  onSubmit,
+}: {
+  projectId: string;
+  pending: boolean;
+  onSubmit: (property: Ga4PropertyOption) => void;
+}) {
+  const [properties, setProperties] = React.useState<Ga4PropertyOption[] | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [selected, setSelected] = React.useState("");
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const response = await fetch(
+          `/api/integrations/google-analytics/properties?projectId=${projectId}`,
+        );
+        const payload: unknown = await response.json();
+        if (cancelled) return;
+
+        if (!response.ok) {
+          setError(
+            typeof payload === "object" && payload !== null && "error" in payload
+              ? String((payload as { error: unknown }).error)
+              : "Could not list your Analytics properties.",
+          );
+          return;
+        }
+        setProperties((payload as { properties: Ga4PropertyOption[] }).properties);
+      } catch {
+        if (!cancelled) setError("Could not reach Google Analytics.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  const chosen = (properties ?? []).find((entry) => entry.propertyId === selected);
+
+  return (
+    <div className="mt-4 border-t pt-4">
+      <Label htmlFor="ga4-property">Choose the property to report on</Label>
+      {loading ? (
+        <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2Icon className="size-4 animate-spin" /> Loading your properties…
+        </p>
+      ) : error ? (
+        <p className="mt-2 text-sm text-destructive">{error}</p>
+      ) : (properties ?? []).length === 0 ? (
+        <p className="mt-2 text-sm text-muted-foreground">
+          This Google account cannot read any GA4 properties. Ask for at least Viewer access in
+          Google Analytics, then reconnect.
+        </p>
+      ) : (
+        <div className="mt-2 flex flex-wrap gap-2">
+          <Select value={selected} onValueChange={setSelected}>
+            <SelectTrigger id="ga4-property" className="min-w-64 flex-1">
+              <SelectValue placeholder="Select a property" />
+            </SelectTrigger>
+            <SelectContent>
+              {(properties ?? []).map((property) => (
+                <SelectItem key={property.propertyId} value={property.propertyId}>
+                  {property.accountName} · {property.displayName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="gradient"
+            disabled={!chosen || pending}
+            onClick={() => chosen && onSubmit(chosen)}
+          >
+            Use this property
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

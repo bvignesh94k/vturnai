@@ -227,15 +227,31 @@ export const selectSearchConsoleSiteSchema = z.object({
   siteUrl: z.string().trim().min(4).max(2048),
 });
 
+/**
+ * The API key is required, not optional. It is the only thing that proves the
+ * user controls the Bing property, so a connection cannot be established
+ * without one.
+ */
 export const bingConnectSchema = z.object({
   projectId: z.uuid(),
   siteUrl: siteUrlSchema,
-  apiKey: z.string().trim().min(10).max(200).optional(),
+  apiKey: z
+    .string()
+    .trim()
+    .min(10, "Enter the API key from Bing Webmaster Tools → Settings → API access.")
+    .max(200),
 });
 
-export const analyticsConnectSchema = z.object({
+/**
+ * A GA4 property is chosen from the list Google returned for the authorised
+ * account, so the id is never free text the user invented.
+ */
+export const selectAnalyticsPropertySchema = z.object({
   projectId: z.uuid(),
-  propertyId: z.string().trim().min(1).max(64),
+  propertyId: z
+    .string()
+    .trim()
+    .regex(/^\d{6,20}$/, "That is not a GA4 property id."),
   propertyName: z.string().trim().max(200).optional(),
 });
 

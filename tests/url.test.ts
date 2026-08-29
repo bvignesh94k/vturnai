@@ -180,6 +180,28 @@ describe("evaluateCrawlEligibility", () => {
     ).toBe("too-many-params");
   });
 
+  it("rejects CMS listing facets that re-slice a page already crawled", () => {
+    // Reported against vturnu.com: WordPress category links in a blog sidebar
+    // were counted as separate pages and then flagged as duplicate titles.
+    for (const url of [
+      `${base}/blog/?cat=AI+Search`,
+      `${base}/blog/?tag=seo`,
+      `${base}/blog/?author=2`,
+      `${base}/blog/?paged=3`,
+      `${base}/shop/?product_cat=shoes`,
+      `${base}/shop/?filter_colour=red`,
+      `${base}/?p=1234`,
+    ]) {
+      expect(evaluateCrawlEligibility(url, base).reason).toBe("faceted-listing");
+    }
+  });
+
+  it("keeps query parameters that genuinely change the page", () => {
+    for (const url of [`${base}/docs?lang=ta`, `${base}/product?variant=large`]) {
+      expect(evaluateCrawlEligibility(url, base).eligible).toBe(true);
+    }
+  });
+
   it("rejects paths that are too deep", () => {
     expect(evaluateCrawlEligibility(`${base}/a/b/c/d/e/f/g/h/i/j`, base).reason).toBe("too-deep");
   });

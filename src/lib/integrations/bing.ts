@@ -2,6 +2,7 @@ import "server-only";
 
 import { loadCredentials, setConnectionStatus } from "@/lib/integrations/credentials";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
+import { toRegistrableHost } from "@/lib/crawler/url";
 import { logger } from "@/lib/logger";
 import { isRecord, round } from "@/lib/utils";
 
@@ -38,6 +39,11 @@ export interface BingIndexInfo {
 
 export function isBingConfigured(): boolean {
   return Boolean(process.env.BING_WEBMASTER_API_KEY?.trim());
+}
+
+export interface BingSite {
+  url: string;
+  isVerified: boolean;
 }
 
 async function resolveApiKey(input: {
@@ -89,6 +95,76 @@ function parseBingDate(value: unknown): string | null {
   if (match?.[1]) return new Date(Number(match[1])).toISOString().slice(0, 10);
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
+}
+
+/**
+ * The sites a Bing Webmaster API key actually grants access to.
+ *
+ * Takes the key directly rather than loading it from storage, so a key can be
+ * proven to work before anything is written. This is what makes a Bing
+ * connection real: the key is the authentication, so the set of sites it
+ * returns is the only evidence that the user controls the property.
+ */
+export async function listBingSites(apiKey: string): Promise<BingSite[]> {
+  const payload = await callBing({ apiKey, method: "GetUserSites", params: {} });
+
+  return readArray(payload)
+    .filter(isRecord)
+    .map((row) => ({
+      url: typeof row["Url"] === "string" ? row["Url"] : "",
+      isVerified: row["IsVerified"] === true,
+    }))
+    .filter((site) => site.url.length > 0);
+}
+
+/**
+ * Confirm a key works and grants the requested site.
+ *
+ * Returns the matched site so the caller can store Bing's own spelling of the
+ * URL rather than whatever the user typed. Host comparison ignores `www.` and
+ * scheme, which routinely differ between what someone enters here and how the
+ * property is registered in Bing.
+ */
+export async function verifyBingSiteAccess(input: {
+  apiKey: string;
+  siteUrl: string;
+}): Promise<{ ok: true; site: BingSite } | { ok: false; reason: string; sites: BingSite[] }> {
+  let sites: BingSite[];
+  try {
+    sites = await listBingSites(input.apiKey);
+  } catch (error) {
+    log.warn("Bing site listing failed during verification", { error });
+    return {
+      ok: false,
+      reason:
+        "Bing did not accept that API key. Generate a new one in Bing Webmaster Tools under Settings → API access.",
+      sites: [],
+    };
+  }
+
+  if (sites.length === 0) {
+    return {
+      ok: false,
+      reason:
+        "That API key works, but no sites are registered against it in Bing Webmaster Tools. Add and verify your site there first.",
+      sites,
+    };
+  }
+
+  // Compare on host alone: scheme and a leading `www.` routinely differ between
+  // what someone types here and how the property is registered in Bing.
+  const wanted = toRegistrableHost(input.siteUrl);
+  const match = sites.find((site) => wanted !== null && toRegistrableHost(site.url) === wanted);
+
+  if (!match) {
+    return {
+      ok: false,
+      reason: `That key does not grant access to ${input.siteUrl}.`,
+      sites,
+    };
+  }
+
+  return { ok: true, site: match };
 }
 
 export async function fetchBingRankAndTraffic(input: {

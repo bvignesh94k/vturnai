@@ -8,23 +8,24 @@ import { appUrl } from "@/lib/config/site";
 import { isRecord } from "@/lib/utils";
 import { logger, errorMessage } from "@/lib/logger";
 
-const log = logger.child("google-oauth-callback");
+const log = logger.child("ga4-oauth-callback");
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Google OAuth callback for Search Console.
+ * Google OAuth callback for Analytics 4.
  *
- * The `state` parameter is decoded and matched against the audit log entry
- * written when the flow started, so a response we did not initiate is rejected.
- * The refresh token is encrypted before it is stored.
+ * Mirrors the Search Console callback: the `state` nonce is matched against the
+ * audit-log entry written when the flow started, and the refresh token is
+ * encrypted before storage. Authorisation only establishes the *account*, so
+ * the connection is left at `configuration_required` until the user picks a
+ * property and that property answers a real Data API request.
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   // Never derive the origin from the request: behind a reverse proxy the app
-  // sees its own internal `http://localhost:3000` and would bounce the user
-  // there after a successful authorisation.
+  // sees its own internal `http://localhost:3000`.
   const origin = appUrl();
   const code = searchParams.get("code");
   const state = searchParams.get("state");
@@ -34,7 +35,9 @@ export async function GET(request: NextRequest) {
     `${origin}/app/integrations?error=${encodeURIComponent(message)}`;
 
   if (error) return NextResponse.redirect(failureUrl(`Google returned: ${error}`));
-  if (!code || !state) return NextResponse.redirect(failureUrl("That authorisation link was incomplete."));
+  if (!code || !state) {
+    return NextResponse.redirect(failureUrl("That authorisation link was incomplete."));
+  }
 
   const user = await getCurrentUser();
   if (!user) return NextResponse.redirect(`${origin}/login`);
@@ -52,7 +55,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(failureUrl("That authorisation response was missing its state."));
   }
 
-  // Confirm the project belongs to this user, under RLS.
   const supabase = await createServerSupabaseClient();
   const { data: project } = await supabase
     .from("projects")
@@ -62,7 +64,6 @@ export async function GET(request: NextRequest) {
 
   if (!project) return NextResponse.redirect(failureUrl("That project could not be found."));
 
-  // Verify the nonce matches a flow we started for this project.
   const admin = createServiceRoleClient();
   const { data: startedFlow } = await admin
     .from("audit_logs")
@@ -84,12 +85,12 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const tokens = await exchangeGoogleCode({ code, integration: "searchConsole" });
+    const tokens = await exchangeGoogleCode({ code, integration: "analytics" });
 
     await saveCredentials({
       organizationId: project.organization_id,
       projectId: project.id,
-      provider: "google_search_console",
+      provider: "google_analytics",
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresAt: tokens.expiresAt,
@@ -99,16 +100,16 @@ export async function GET(request: NextRequest) {
 
     await setConnectionStatus({
       projectId: project.id,
-      provider: "google_search_console",
-      // Connected at the account level; the user still picks which property.
+      provider: "google_analytics",
+      // Account authorised; the property is still unchosen and unverified.
       status: "configuration_required",
       displayName: emailFromIdToken(tokens.idToken),
       lastError: null,
     });
 
-    return NextResponse.redirect(`${origin}/app/integrations?connected=google_search_console`);
+    return NextResponse.redirect(`${origin}/app/integrations?connected=google_analytics`);
   } catch (caught) {
-    log.error("Google token exchange failed", { error: caught });
+    log.error("Google Analytics token exchange failed", { error: caught });
     return NextResponse.redirect(failureUrl(errorMessage(caught)));
   }
 }

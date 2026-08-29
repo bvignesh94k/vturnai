@@ -101,6 +101,57 @@ const EXCLUDED_QUERY_KEYS = new Set([
   "print",
 ]);
 
+/**
+ * Query keys that re-filter or re-order an existing listing page.
+ *
+ * These produce real, reachable URLs, so they are not invalid, but they render
+ * a slice of a page the crawler already has. Counting them as separate pages
+ * inflates the site total and manufactures duplicate-title findings against a
+ * template the site owner never wrote twice. WordPress and WooCommerce are the
+ * common sources; `lang` is deliberately absent because it changes content.
+ */
+const FACET_QUERY_KEYS = new Set([
+  // WordPress taxonomy and archive filters.
+  "cat",
+  "category",
+  "category_name",
+  "tag",
+  "tag_id",
+  "author",
+  "author_name",
+  "m",
+  "monthnum",
+  "year",
+  "day",
+  // WordPress raw-ID forms that duplicate a pretty permalink.
+  "p",
+  "page_id",
+  "attachment_id",
+  "preview",
+  "preview_id",
+  // Listing pagination and ordering.
+  "paged",
+  "orderby",
+  "order",
+  "sort",
+  "sort_by",
+  "per_page",
+  "posts_per_page",
+  // WooCommerce and common storefront facets.
+  "product_cat",
+  "product_tag",
+  "min_price",
+  "max_price",
+  "rating_filter",
+  "stock_status",
+]);
+
+/** True when a query key filters or re-orders a listing rather than changing the page. */
+function isFacetKey(key: string): boolean {
+  const lower = key.toLowerCase();
+  return FACET_QUERY_KEYS.has(lower) || lower.startsWith("filter_") || lower.startsWith("facet_");
+}
+
 /** File extensions that are not HTML documents. */
 const NON_HTML_EXTENSIONS = new Set([
   "jpg", "jpeg", "png", "gif", "webp", "avif", "svg", "ico", "bmp", "tiff",
@@ -262,6 +313,7 @@ export interface CrawlEligibility {
     | "off-site"
     | "excluded-path"
     | "excluded-query"
+    | "faceted-listing"
     | "non-html"
     | "too-many-params"
     | "too-deep";
@@ -289,6 +341,9 @@ export function evaluateCrawlEligibility(candidate: string, baseUrl: string): Cr
     if (pattern.test(url.pathname)) return { eligible: false, reason: "excluded-path" };
   }
 
+  // Order matters: hard exclusions, then the combinatorial trap guard, then
+  // facet classification. A URL carrying several facets is reported as a trap
+  // rather than as one facet that happened to be checked first.
   const paramKeys = [...url.searchParams.keys()];
   for (const key of paramKeys) {
     if (EXCLUDED_QUERY_KEYS.has(key.toLowerCase())) {
@@ -297,6 +352,11 @@ export function evaluateCrawlEligibility(candidate: string, baseUrl: string): Cr
   }
   if (paramKeys.length > MAX_QUERY_PARAMS) {
     return { eligible: false, reason: "too-many-params" };
+  }
+  for (const key of paramKeys) {
+    if (isFacetKey(key)) {
+      return { eligible: false, reason: "faceted-listing" };
+    }
   }
 
   const depth = url.pathname.split("/").filter(Boolean).length;

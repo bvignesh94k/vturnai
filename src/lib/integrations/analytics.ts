@@ -20,6 +20,7 @@ import { isRecord, round } from "@/lib/utils";
 
 const log = logger.child("ga4");
 const DATA_API = "https://analyticsdata.googleapis.com/v1beta";
+const ADMIN_API = "https://analyticsadmin.googleapis.com/v1beta";
 
 /**
  * Referrer hosts that identify an AI assistant or answer engine.
@@ -134,6 +135,115 @@ async function runReport(input: {
         )
       : [],
   }));
+}
+
+export interface Ga4Property {
+  /** Numeric property id, the form the Data API expects. */
+  propertyId: string;
+  displayName: string;
+  accountName: string;
+}
+
+/**
+ * The GA4 properties the connected Google account can actually read.
+ *
+ * Discovery is what separates a real connection from a typed-in number: a
+ * property id proves nothing on its own, but a property returned by
+ * `accountSummaries` under the user's own token proves they have access to it.
+ */
+export async function listAnalyticsProperties(input: {
+  organizationId: string;
+  projectId: string;
+}): Promise<Ga4Property[]> {
+  const accessToken = await getAccessToken(input);
+  const properties: Ga4Property[] = [];
+  let pageToken: string | undefined;
+
+  do {
+    const query = new URLSearchParams({ pageSize: "200" });
+    if (pageToken) query.set("pageToken", pageToken);
+
+    const response = await fetch(`${ADMIN_API}/accountSummaries?${query.toString()}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      throw new Error(
+        `Google Analytics returned HTTP ${response.status}${detail ? `: ${detail.slice(0, 200)}` : ""}`,
+      );
+    }
+
+    const payload: unknown = await response.json();
+    if (!isRecord(payload)) break;
+
+    for (const summary of Array.isArray(payload["accountSummaries"]) ? payload["accountSummaries"] : []) {
+      if (!isRecord(summary)) continue;
+      const accountName =
+        typeof summary["displayName"] === "string" ? summary["displayName"] : "Unnamed account";
+
+      for (const property of Array.isArray(summary["propertySummaries"])
+        ? summary["propertySummaries"]
+        : []) {
+        if (!isRecord(property)) continue;
+        // `property` arrives as "properties/123456789".
+        const resource = typeof property["property"] === "string" ? property["property"] : "";
+        const propertyId = resource.split("/").pop() ?? "";
+        if (!propertyId) continue;
+
+        properties.push({
+          propertyId,
+          displayName:
+            typeof property["displayName"] === "string" ? property["displayName"] : propertyId,
+          accountName,
+        });
+      }
+    }
+
+    pageToken = typeof payload["nextPageToken"] === "string" ? payload["nextPageToken"] : undefined;
+  } while (pageToken);
+
+  return properties;
+}
+
+/**
+ * Prove the token can read the property before anything is marked connected.
+ *
+ * `accountSummaries` shows administrative visibility; it does not guarantee the
+ * Data API will answer. A one-row report is the cheapest call that proves the
+ * reporting path the product actually depends on.
+ */
+export async function verifyAnalyticsPropertyAccess(input: {
+  organizationId: string;
+  projectId: string;
+  propertyId: string;
+}): Promise<{ ok: true } | { ok: false; reason: string }> {
+  try {
+    const accessToken = await getAccessToken(input);
+    await runReport({
+      accessToken,
+      propertyId: input.propertyId,
+      dimensions: [],
+      metrics: ["sessions"],
+      startDate: "7daysAgo",
+      endDate: "yesterday",
+      limit: 1,
+    });
+    return { ok: true };
+  } catch (error) {
+    log.warn("GA4 property verification failed", { propertyId: input.propertyId, error });
+    const message = error instanceof Error ? error.message : String(error);
+    // A 403 here means the account can see the property in the admin list but
+    // cannot pull reports from it, which is worth saying plainly.
+    if (message.includes("403")) {
+      return {
+        ok: false,
+        reason:
+          "That Google account can see the property but is not allowed to read its reports. Ask for at least Viewer access in GA4.",
+      };
+    }
+    return { ok: false, reason: "Google Analytics did not return data for that property." };
+  }
 }
 
 export async function syncAnalytics(input: {
