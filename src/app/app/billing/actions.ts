@@ -6,6 +6,7 @@ import { isRazorpayConfigured, verifySubscriptionPaymentSignature } from "@/lib/
 import {
   beginPaidSubscription,
   cancelOrganizationSubscription,
+  startLocalTrial,
   syncSubscriptionFromRazorpay,
 } from "@/lib/billing/subscription-service";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
@@ -45,6 +46,32 @@ export interface StartSubscriptionResult extends ActionResult {
  * free trial keeps the days they have left: the mandate registers now and the
  * first charge falls on the original trial end date.
  */
+
+/**
+ * Start the free trial from the billing page.
+ *
+ * Reachable only for the organisation with no subscription row at all, which
+ * should be rare: onboarding already starts the trial for every new project.
+ * The rare paths that land here (a trial that failed to create silently, an
+ * older account) must not be routed into startSubscriptionAction, which talks
+ * to Razorpay and would show the same checkout as a real upgrade. A button
+ * labelled "free trial" must never send anyone toward a payment screen.
+ */
+export async function startFreeTrialAction(): Promise<ActionResult> {
+  try {
+    const context = await requireBillingAdmin();
+    await startLocalTrial({
+      organizationId: context.activeOrganization.id,
+      billingEmail: context.activeOrganization.billing_email,
+    });
+    revalidatePath("/app/billing");
+    return { ok: true, message: "Your free trial has started. No payment was taken." };
+  } catch (error) {
+    log.error("Could not start free trial from billing page", { error });
+    return { ok: false, error: errorMessage(error) };
+  }
+}
+
 export async function startSubscriptionAction(): Promise<StartSubscriptionResult> {
   try {
     const context = await requireBillingAdmin();

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import {
   cancelSubscriptionAction,
   refreshSubscriptionAction,
+  startFreeTrialAction,
   startSubscriptionAction,
   verifyCheckoutAction,
 } from "@/app/app/billing/actions";
@@ -125,7 +126,26 @@ export function BillingPanel({
     checkout.open();
   }
 
+  /**
+   * "Start free trial" and "Upgrade" are different actions with different
+   * consequences, and must never share a code path. Only the genuine upgrade
+   * talks to Razorpay; a free trial that touched a payment provider would
+   * contradict its own label the moment someone clicked it.
+   */
   function start() {
+    if (status === "none") {
+      startTransition(async () => {
+        const result = await startFreeTrialAction();
+        if (result.ok) {
+          toast.success(result.message ?? "Trial started.");
+          router.refresh();
+        } else {
+          toast.error(result.error ?? "Could not start the trial.");
+        }
+      });
+      return;
+    }
+
     startTransition(async () => {
       const result = await startSubscriptionAction();
       if (!result.ok || !result.subscriptionId) {
@@ -194,7 +214,20 @@ export function BillingPanel({
       {isTrialing && !hasPaymentMethod ? (
         <p className="max-w-xs text-xs text-muted-foreground">
           No payment has been taken. Upgrading now keeps the days left in your trial: your first
-          charge falls on the day it would have ended.
+          real charge falls on the day it would have ended.
+        </p>
+      ) : null}
+
+      {/* Razorpay's own checkout shows a small refundable amount before the
+          real subscription price, its standard way of registering a UPI or
+          card mandate for recurring billing under RBI's rules for India. That
+          screen is Razorpay's, not ours, and it comes as a surprise if nobody
+          said so first, so it is named here before the button is even
+          clicked rather than left for the customer to discover mid-checkout. */}
+      {!hasPaymentMethod && status !== "none" ? (
+        <p className="max-w-xs text-xs text-muted-foreground">
+          Razorpay will ask for a small refundable amount first, its standard step to set up
+          recurring billing. Your subscription price is {formatCurrencyINR(priceMinor)}/month.
         </p>
       ) : null}
 
