@@ -43,6 +43,33 @@ interface ParsedResponse {
  * output array is traversed regardless; `url_citation` annotations carry the
  * sources the model actually used.
  */
+/**
+ * Output budget for this provider.
+ *
+ * Deliberately larger than the shared `MAX_OUTPUT_TOKENS`: on the Responses
+ * API a reasoning model spends part of this allowance thinking before it
+ * writes anything, so a budget sized only for the answer produces a
+ * successful call containing no answer.
+ */
+const OPENAI_MAX_OUTPUT_TOKENS = Math.max(MAX_OUTPUT_TOKENS, 2_500);
+
+/** Why a response arrived with no text, when the payload says so. */
+function describeEmptyResponse(payload: unknown): string | null {
+  if (!isRecord(payload)) return null;
+
+  const status = typeof payload["status"] === "string" ? payload["status"] : null;
+  const incomplete = payload["incomplete_details"];
+  const reason =
+    isRecord(incomplete) && typeof incomplete["reason"] === "string" ? incomplete["reason"] : null;
+
+  if (reason === "max_output_tokens") {
+    return "ran out of output budget before writing an answer";
+  }
+  if (reason) return reason;
+  if (status && status !== "completed") return `status ${status}`;
+  return null;
+}
+
 export function parseOpenAiResponse(payload: unknown): ParsedResponse {
   const citations: Array<{ url?: string | null; title?: string | null }> = [];
   const textParts: string[] = [];
@@ -120,16 +147,30 @@ export class OpenAIVisibilityProvider implements AIVisibilityProvider {
         instructions: system,
         input: user,
         tools: [{ type: "web_search" }],
-        max_output_tokens: MAX_OUTPUT_TOKENS,
+        /**
+         * Reasoning tokens are charged against `max_output_tokens` on this
+         * endpoint, so the answer and the model's private reasoning share one
+         * budget. At the shared 900 the reasoning alone could consume the lot
+         * and the call returned successfully with no visible text at all.
+         * The budget is raised to leave room for both, and reasoning effort is
+         * kept low because this prompt wants a short factual answer rather
+         * than deliberation.
+         */
+        max_output_tokens: OPENAI_MAX_OUTPUT_TOKENS,
+        reasoning: { effort: "low" },
         store: false,
       },
     });
 
     const parsed = parseOpenAiResponse(payload);
     if (!parsed.text) {
+      // Name the cause rather than reporting a bare empty answer: running out
+      // of budget mid-reasoning and a genuine refusal need different fixes,
+      // and the response says which happened.
+      const detail = describeEmptyResponse(payload);
       throw new ProviderRequestError(
         "openai",
-        "OpenAI returned an empty answer.",
+        `OpenAI returned an empty answer${detail ? ` (${detail})` : ""}.`,
         "invalid_response",
       );
     }
