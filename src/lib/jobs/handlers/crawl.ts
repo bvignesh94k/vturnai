@@ -4,6 +4,7 @@ import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { getEntitlements } from "@/lib/billing/entitlements";
 import { recordUsage } from "@/lib/billing/usage";
 import { buildInitialFrontier, crawlBatch, hashUrl, type CrawlTarget, type CrawledPage } from "@/lib/crawler/crawler";
+import { recordDiscoveries, type UrlSource } from "@/lib/crawler/provenance";
 import { detectBlockedAiCrawlers, fetchRobotsTxt } from "@/lib/crawler/robots";
 import { discoverSitemaps } from "@/lib/crawler/sitemap";
 import { normalizeUrl } from "@/lib/crawler/url";
@@ -79,6 +80,26 @@ export async function handleWebsiteCrawl(job: JobRow): Promise<void> {
   });
 
   await persistPages(state.crawlId, projectId, result.pages);
+
+  // Record where each URL in this batch came from, and where the newly found
+  // ones came from. Done alongside the pages rather than after the crawl so a
+  // run that is interrupted still leaves every page it stored accountable.
+  await recordDiscoveries([
+    ...batch.map((target) => ({
+      projectId,
+      url: target.url,
+      sourceType: (target.source ?? "internal_link") as UrlSource,
+      sourceDetail: target.discoveredFrom ?? null,
+      crawlId: state.crawlId,
+    })),
+    ...result.discovered.map((target) => ({
+      projectId,
+      url: target.url,
+      sourceType: (target.source ?? "internal_link") as UrlSource,
+      sourceDetail: target.discoveredFrom ?? null,
+      crawlId: state.crawlId,
+    })),
+  ]);
 
   const succeeded = result.pages.filter((page) => page.page !== null).length;
   const failed = result.pages.length - succeeded;

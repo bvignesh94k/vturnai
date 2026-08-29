@@ -268,6 +268,32 @@ export type CrawlRow = {
   updated_at: string;
 }
 
+/** Where a URL was discovered. `suggested` does not assert the page exists. */
+export type UrlSourceDb =
+  | "project_seed"
+  | "internal_link"
+  | "sitemap"
+  | "redirect"
+  | "canonical"
+  | "search_console"
+  | "bing_webmaster"
+  | "analytics_landing_page"
+  | "user_input"
+  | "suggested";
+
+export type UrlDiscoveryRow = {
+  id: string;
+  project_id: string;
+  url: string;
+  normalized_url: string;
+  url_hash: string;
+  source_type: UrlSourceDb;
+  source_detail: string | null;
+  crawl_id: string | null;
+  first_seen_at: string;
+  last_seen_at: string;
+};
+
 export type CrawlPageRow = {
   id: string;
   crawl_id: string;
@@ -855,6 +881,16 @@ export type Database = {
       crawl_pages: TableShape<
         CrawlPageRow,
         Partial<CrawlPageRow> & { crawl_id: string; project_id: string; url: string; url_hash: string }
+      >;
+      url_discoveries: TableShape<
+        UrlDiscoveryRow,
+        Partial<UrlDiscoveryRow> & {
+          project_id: string;
+          url: string;
+          normalized_url: string;
+          url_hash: string;
+          source_type: UrlSourceDb;
+        }
       >;
       page_links: TableShape<
         PageLinkRow,

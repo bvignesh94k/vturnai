@@ -17,6 +17,15 @@ import { errorMessage } from "@/lib/logger";
 export interface CrawlTarget {
   url: string;
   depth: number;
+  /**
+   * How this URL came to be in the frontier, carried so the job handler can
+   * record its provenance. Without it a page arrives in the database with no
+   * account of why it was crawled, which is how findings end up citing pages
+   * nobody can trace.
+   */
+  source?: "project_seed" | "sitemap" | "internal_link";
+  /** The page that linked here, for `internal_link`. */
+  discoveredFrom?: string;
 }
 
 export interface CrawledPage {
@@ -143,7 +152,12 @@ export async function crawlBatch(input: CrawlBatchInput): Promise<CrawlBatchResu
               skipped.push({ url: normalized, reason: "robots-disallow" });
               continue;
             }
-            discoveredMap.set(normalized, { url: normalized, depth: target.depth + 1 });
+            discoveredMap.set(normalized, {
+              url: normalized,
+              depth: target.depth + 1,
+              source: "internal_link",
+              discoveredFrom: response.finalUrl,
+            });
           }
         }
 
@@ -181,7 +195,7 @@ export function buildInitialFrontier(input: {
 
   const home = normalizeUrl(input.siteUrl);
   if (home) {
-    frontier.push({ url: home, depth: 0 });
+    frontier.push({ url: home, depth: 0, source: "project_seed" });
     seen.add(home);
   }
 
@@ -191,7 +205,7 @@ export function buildInitialFrontier(input: {
     if (!normalized || seen.has(normalized)) continue;
     if (!evaluateCrawlEligibility(normalized, input.siteUrl).eligible) continue;
     seen.add(normalized);
-    frontier.push({ url: normalized, depth: 1 });
+    frontier.push({ url: normalized, depth: 1, source: "sitemap" });
   }
 
   return frontier;

@@ -4,6 +4,7 @@ import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { calculatePriority, priorityBand, PRIORITY_BAND_LABELS } from "@/lib/metrics/opportunity-priority";
 import { completeJob, payloadValue, updateJobProgress } from "@/lib/jobs/queue";
 import { logger } from "@/lib/logger";
+import { knownUrlSet } from "@/lib/crawler/provenance";
 import { percentage, unique } from "@/lib/utils";
 import type { EffortLevel, IssueSeverity } from "@/lib/config/scoring";
 import type { DisciplineDb, EffortLevelDb, IssueSeverityDb, JobRow, Json } from "@/lib/db/types";
@@ -52,14 +53,43 @@ export async function handleOpportunityGeneration(job: JobRow): Promise<void> {
   const impressionsByUrl = await loadImpressionsByUrl(projectId);
   const promptGap = await loadPromptGap(projectId);
 
-  const rows = [];
+  const urlsByIssue = new Map<string, string[]>();
   for (const issue of issues ?? []) {
     const evidence = (issue.evidence ?? {}) as Record<string, unknown>;
-    const affectedUrls = Array.isArray(evidence["affectedUrls"])
-      ? (evidence["affectedUrls"] as string[])
-      : issue.affected_url
-        ? [issue.affected_url]
-        : [];
+    urlsByIssue.set(
+      issue.id,
+      Array.isArray(evidence["affectedUrls"])
+        ? (evidence["affectedUrls"] as string[])
+        : issue.affected_url
+          ? [issue.affected_url]
+          : [],
+    );
+  }
+
+  /**
+   * An opportunity may only name pages we can account for.
+   *
+   * A URL with no discovery record is one we cannot explain to the person
+   * reading the finding, and showing it invites exactly the reaction it got
+   * from the first customer to look closely: "there is no such url". Anything
+   * unaccounted for is dropped and logged, so the gap surfaces as a bug in
+   * whatever produced it rather than as a wrong number on a dashboard.
+   *
+   * Resolved once for the whole batch: this runs over hundreds of issues, and a
+   * lookup per issue would put the crawl's slowest step inside a loop.
+   */
+  const accountableUrls = await knownUrlSet({
+    projectId,
+    urls: unique([...urlsByIssue.values()].flat()),
+  });
+
+  const rows = [];
+  for (const issue of issues ?? []) {
+    const claimedUrls = urlsByIssue.get(issue.id) ?? [];
+    const affectedUrls = claimedUrls.filter((url) => accountableUrls.has(url));
+
+    // A finding whose entire evidence base was untraceable is not a finding.
+    if (claimedUrls.length > 0 && affectedUrls.length === 0) continue;
 
     const trafficPotential =
       impressionsByUrl === null
