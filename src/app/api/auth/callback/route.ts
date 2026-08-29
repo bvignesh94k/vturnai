@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
   if (error) {
     log.warn("Code exchange failed", { message: error.message });
     return NextResponse.redirect(
-      `${origin}/login?error=${encodeURIComponent("That link has expired. Please sign in again.")}`,
+      `${origin}/login?error=${encodeURIComponent("That link has expired. Please sign in again.")}&resend=true`,
     );
   }
 

@@ -147,6 +147,36 @@ export async function signOutAction(): Promise<void> {
   redirect("/login");
 }
 
+export async function resendConfirmationAction(
+  _previous: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const email = formData.get("email") as string;
+
+  if (!email) {
+    return { error: "Email is required" };
+  }
+
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: email,
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return {
+      notice: "Confirmation email resent! Check your inbox.",
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Failed to resend email";
+    return { error: errorMessage };
+  }
+}
+
 export async function requestPasswordResetAction(
   _previous: AuthActionState,
   formData: FormData,
