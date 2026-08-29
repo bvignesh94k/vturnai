@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireUserContext } from "@/lib/auth/session";
 import { isRazorpayConfigured, verifySubscriptionPaymentSignature } from "@/lib/billing/razorpay";
 import {
+  beginPaidSubscription,
   cancelOrganizationSubscription,
-  startTrialSubscription,
   syncSubscriptionFromRazorpay,
 } from "@/lib/billing/subscription-service";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
@@ -34,8 +34,17 @@ export interface StartSubscriptionResult extends ActionResult {
   subscriptionId?: string;
   keyId?: string;
   shortUrl?: string | null;
+  /** ISO date of the first charge, so the UI can state it before checkout. */
+  firstChargeAt?: string;
 }
 
+/**
+ * Upgrade to a paid plan.
+ *
+ * This is the first point at which a card is requested. Anyone still inside a
+ * free trial keeps the days they have left: the mandate registers now and the
+ * first charge falls on the original trial end date.
+ */
 export async function startSubscriptionAction(): Promise<StartSubscriptionResult> {
   try {
     const context = await requireBillingAdmin();
@@ -47,7 +56,7 @@ export async function startSubscriptionAction(): Promise<StartSubscriptionResult
       };
     }
 
-    const result = await startTrialSubscription({
+    const result = await beginPaidSubscription({
       organizationId: context.activeOrganization.id,
       billingEmail: context.activeOrganization.billing_email,
     });
@@ -58,7 +67,8 @@ export async function startSubscriptionAction(): Promise<StartSubscriptionResult
       subscriptionId: result.razorpaySubscriptionId,
       keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim() ?? "",
       shortUrl: result.shortUrl,
-      message: "Subscription created. Complete authorisation to start your trial.",
+      firstChargeAt: result.firstChargeAt.toISOString(),
+      message: "Complete checkout to activate your subscription.",
     };
   } catch (error) {
     log.error("Could not start subscription", { error });

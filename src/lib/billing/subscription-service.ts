@@ -31,73 +31,172 @@ export interface StartTrialInput {
   notes?: Record<string, string>;
 }
 
-export interface StartTrialResult {
-  subscription: SubscriptionRow;
-  razorpaySubscriptionId: string;
-  shortUrl: string | null;
-  trialEnd: Date;
+const LIVE_STATUSES: readonly SubscriptionStatus[] = [
+  "created",
+  "authenticated",
+  "trialing",
+  "active",
+  "past_due",
+  "paused",
+];
+
+/** The organization's current subscription row, whatever state it is in. */
+async function findLiveSubscription(organizationId: string): Promise<SubscriptionRow | null> {
+  const supabase = createServiceRoleClient();
+  const { data } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .eq("organization_id", organizationId)
+    .in("status", LIVE_STATUSES)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data ?? null;
 }
 
-export async function startTrialSubscription(input: StartTrialInput): Promise<StartTrialResult> {
+async function resolveTrialDaysFor(planCode: PlanCode): Promise<number> {
+  const supabase = createServiceRoleClient();
+  const { data: config } = await supabase
+    .from("plan_configurations")
+    .select("trial_days")
+    .eq("plan_code", planCode)
+    .maybeSingle();
+  return resolveTrialDays(planCode, config?.trial_days);
+}
+
+/**
+ * Begin the free trial.
+ *
+ * Deliberately does not touch Razorpay. A Razorpay subscription registers a
+ * payment mandate, and registering a mandate means an authorisation charge:
+ * the ₹5 that made an advertised-as-free trial ask for money at signup. A trial
+ * costs nothing, so nothing about it needs a payment provider: it is a row with
+ * a start and an end, and the entitlement layer already reads status from the
+ * database rather than from Razorpay.
+ *
+ * The card is collected only when someone chooses to pay, in
+ * `beginPaidSubscription` below.
+ *
+ * Idempotent: an organization that already has a live subscription keeps it.
+ */
+export async function startLocalTrial(input: StartTrialInput): Promise<SubscriptionRow> {
   const supabase = createServiceRoleClient();
   const planCode = input.planCode ?? DEFAULT_PLAN_CODE;
 
-  const { data: config } = await supabase
-    .from("plan_configurations")
-    .select("*")
-    .eq("plan_code", planCode)
-    .maybeSingle();
+  const existing = await findLiveSubscription(input.organizationId);
+  if (existing) return existing;
 
-  const trialDays = resolveTrialDays(planCode, config?.trial_days);
-
-  const { data: existing } = await supabase
-    .from("subscriptions")
-    .select("*")
-    .eq("organization_id", input.organizationId)
-    .in("status", ["created", "authenticated", "trialing", "active", "past_due", "paused"])
-    .maybeSingle();
-
-  if (existing?.razorpay_subscription_id) {
-    // Already has a live subscription; re-verify rather than creating a second.
-    const refreshed = await syncSubscriptionFromRazorpay(existing.razorpay_subscription_id);
-    return {
-      subscription: refreshed ?? existing,
-      razorpaySubscriptionId: existing.razorpay_subscription_id,
-      shortUrl: existing.short_url,
-      trialEnd: existing.trial_end ? new Date(existing.trial_end) : addDays(new Date(), trialDays),
-    };
-  }
-
-  const razorpay = await createSubscription({
-    planCode,
-    trialDays,
-    notes: { organization_id: input.organizationId, ...(input.notes ?? {}) },
-  });
-
+  const trialDays = await resolveTrialDaysFor(planCode);
   const trialStart = new Date();
-  const trialEnd = razorpay.startAt ?? addDays(trialStart, trialDays);
+  const trialEnd = addDays(trialStart, trialDays);
 
   const { data: subscription, error } = await supabase
     .from("subscriptions")
-    .upsert(
-      {
-        organization_id: input.organizationId,
-        plan_code: planCode,
-        status: mapRazorpayStatus(razorpay.status, trialEnd),
-        razorpay_subscription_id: razorpay.id,
-        razorpay_customer_id: razorpay.customerId,
-        razorpay_plan_id: razorpay.planId,
-        trial_start: trialStart.toISOString(),
-        trial_end: trialEnd.toISOString(),
-        current_period_start: razorpay.currentStart?.toISOString() ?? trialStart.toISOString(),
-        current_period_end: razorpay.currentEnd?.toISOString() ?? trialEnd.toISOString(),
-        short_url: razorpay.shortUrl,
-        last_verified_at: new Date().toISOString(),
-      },
-      { onConflict: "razorpay_subscription_id" },
-    )
+    .insert({
+      organization_id: input.organizationId,
+      plan_code: planCode,
+      status: "trialing" as SubscriptionStatus,
+      trial_start: trialStart.toISOString(),
+      trial_end: trialEnd.toISOString(),
+      current_period_start: trialStart.toISOString(),
+      current_period_end: trialEnd.toISOString(),
+      last_verified_at: trialStart.toISOString(),
+    })
     .select("*")
     .single();
+
+  if (error || !subscription) {
+    throw new Error(`Could not start the trial: ${error?.message ?? "unknown error"}`);
+  }
+
+  await recordBillingEvent({
+    organizationId: input.organizationId,
+    subscriptionId: subscription.id,
+    eventType: "trial.started",
+    providerEventId: `local:trial:${subscription.id}`,
+    payload: { trialEnd: trialEnd.toISOString(), trialDays },
+  });
+
+  log.info("Local trial started", {
+    organizationId: input.organizationId,
+    trialEnd: trialEnd.toISOString(),
+  });
+
+  return subscription;
+}
+
+export interface BeginPaidSubscriptionResult {
+  subscription: SubscriptionRow;
+  razorpaySubscriptionId: string;
+  shortUrl: string | null;
+  /** When the first charge falls due. */
+  firstChargeAt: Date;
+}
+
+/**
+ * Move an organization onto a paid plan.
+ *
+ * This is the only place a Razorpay subscription is created, and it runs when
+ * someone has actively chosen to pay. If they are still inside a free trial the
+ * remaining days are preserved: the mandate is registered now, the first charge
+ * falls on the original trial end date, so upgrading on day 3 never costs
+ * someone the four days they were promised.
+ */
+export async function beginPaidSubscription(
+  input: StartTrialInput,
+): Promise<BeginPaidSubscriptionResult> {
+  const supabase = createServiceRoleClient();
+  const planCode = input.planCode ?? DEFAULT_PLAN_CODE;
+
+  const existing = await findLiveSubscription(input.organizationId);
+
+  if (existing?.razorpay_subscription_id) {
+    // Already on a paid mandate; re-verify rather than creating a second.
+    const refreshed = await syncSubscriptionFromRazorpay(existing.razorpay_subscription_id);
+    const row = refreshed ?? existing;
+    return {
+      subscription: row,
+      razorpaySubscriptionId: existing.razorpay_subscription_id,
+      shortUrl: existing.short_url,
+      firstChargeAt: toDateOr(row.current_period_end, new Date()),
+    };
+  }
+
+  // Honour whatever is left of the trial rather than restarting or dropping it.
+  const existingTrialEnd = existing?.trial_end ? new Date(existing.trial_end) : null;
+  const remainingDays =
+    existingTrialEnd && existingTrialEnd.getTime() > Date.now()
+      ? (existingTrialEnd.getTime() - Date.now()) / 86_400_000
+      : 0;
+
+  const razorpay = await createSubscription({
+    planCode,
+    trialDays: remainingDays,
+    notes: { organization_id: input.organizationId, ...(input.notes ?? {}) },
+  });
+
+  const now = new Date();
+  const firstChargeAt = razorpay.startAt ?? existingTrialEnd ?? now;
+
+  const patch = {
+    organization_id: input.organizationId,
+    plan_code: planCode,
+    status: mapRazorpayStatus(razorpay.status, existingTrialEnd),
+    razorpay_subscription_id: razorpay.id,
+    razorpay_customer_id: razorpay.customerId,
+    razorpay_plan_id: razorpay.planId,
+    // Preserve the original trial window; upgrading does not restart it.
+    trial_start: existing?.trial_start ?? now.toISOString(),
+    trial_end: existingTrialEnd?.toISOString() ?? null,
+    current_period_start: razorpay.currentStart?.toISOString() ?? now.toISOString(),
+    current_period_end: razorpay.currentEnd?.toISOString() ?? firstChargeAt.toISOString(),
+    short_url: razorpay.shortUrl,
+    last_verified_at: now.toISOString(),
+  };
+
+  const { data: subscription, error } = existing
+    ? await supabase.from("subscriptions").update(patch).eq("id", existing.id).select("*").single()
+    : await supabase.from("subscriptions").insert(patch).select("*").single();
 
   if (error || !subscription) {
     throw new Error(`Could not store subscription: ${error?.message ?? "unknown error"}`);
@@ -108,15 +207,25 @@ export async function startTrialSubscription(input: StartTrialInput): Promise<St
     subscriptionId: subscription.id,
     eventType: "subscription.created",
     providerEventId: `local:created:${razorpay.id}`,
-    payload: { razorpaySubscriptionId: razorpay.id, trialEnd: trialEnd.toISOString() },
+    payload: {
+      razorpaySubscriptionId: razorpay.id,
+      firstChargeAt: firstChargeAt.toISOString(),
+      preservedTrialDays: remainingDays,
+    },
   });
 
   return {
     subscription,
     razorpaySubscriptionId: razorpay.id,
     shortUrl: razorpay.shortUrl,
-    trialEnd,
+    firstChargeAt,
   };
+}
+
+function toDateOr(value: string | null, fallback: Date): Date {
+  if (!value) return fallback;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? fallback : date;
 }
 
 /**
@@ -418,7 +527,7 @@ export async function expireLapsedTrials(): Promise<{ expired: number; warned: n
     await notifyOrganization(subscription.organization_id, {
       type: "trial_ending",
       title: "Your free trial has ended",
-      body: "Add a payment method to keep running audits and AI visibility scans.",
+      body: "Your projects, crawls and reports are safe. Upgrade to continue monitoring your visibility.",
       actionUrl: "/app/billing",
     });
     expired += 1;
@@ -435,10 +544,16 @@ export async function expireLapsedTrials(): Promise<{ expired: number; warned: n
     .lte("trial_end", warnTo.toISOString());
 
   for (const subscription of ending ?? []) {
+    // Someone still on a free trial has given us no payment method, so telling
+    // them a payment is about to be collected would be false. Only an account
+    // that has actually authorised a mandate gets that warning.
+    const hasMandate = Boolean(subscription.razorpay_subscription_id);
     await notifyOrganization(subscription.organization_id, {
       type: "trial_ending",
       title: "Your trial ends in 2 days",
-      body: "Your first payment will be collected when the trial ends. Cancel before then if V Turn AI is not for you.",
+      body: hasMandate
+        ? "Your first payment will be collected when the trial ends. Cancel before then if V Turn AI is not for you."
+        : "No payment has been taken. Upgrade before it ends to keep your audits, prompts and reports running.",
       actionUrl: "/app/billing",
     });
   }

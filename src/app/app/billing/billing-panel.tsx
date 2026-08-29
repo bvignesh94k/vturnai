@@ -49,6 +49,7 @@ export function BillingPanel({
   status,
   isActive,
   isTrialing,
+  hasPaymentMethod,
   cancelAtPeriodEnd,
   canManage,
   razorpayConfigured,
@@ -62,6 +63,8 @@ export function BillingPanel({
   status: string;
   isActive: boolean;
   isTrialing: boolean;
+  /** True once a Razorpay mandate exists. A free trial has none. */
+  hasPaymentMethod: boolean;
   cancelAtPeriodEnd: boolean;
   canManage: boolean;
   razorpayConfigured: boolean;
@@ -93,7 +96,7 @@ export function BillingPanel({
       name: "V Turn AI",
       // Naming the workspace here means someone with several workspaces can see
       // which one they are paying for before they authorise the mandate.
-      description: `${planName} for ${organizationName}: ${formatCurrencyINR(priceMinor)}/month after a ${trialDays}-day free trial`,
+      description: `${planName} for ${organizationName}: ${formatCurrencyINR(priceMinor)}/month`,
       prefill: { email },
       theme: { color: "#5b3df5" },
       handler: (response) => {
@@ -114,7 +117,7 @@ export function BillingPanel({
       },
       modal: {
         ondismiss: () => {
-          toast.info("Checkout closed. Your trial has not started yet.");
+          toast.info("Checkout closed. Nothing has been charged.");
         },
       },
     });
@@ -169,7 +172,10 @@ export function BillingPanel({
         onLoad={() => setScriptReady(true)}
       />
 
-      {!isActive || status === "created" ? (
+      {/* Upgrading must be possible at any point during the trial, not only
+          once it has lapsed. Someone convinced on day 3 should be able to pay
+          on day 3 and keep the days they have left. */}
+      {!hasPaymentMethod || !isActive ? (
         <Button
           variant="gradient"
           size="lg"
@@ -177,13 +183,24 @@ export function BillingPanel({
           onClick={start}
         >
           {pending ? <Loader2Icon className="animate-spin" /> : null}
-          {status === "none" ? `Start ${trialDays}-day free trial` : "Reactivate subscription"}
+          {isTrialing
+            ? `Upgrade to ${planName}`
+            : status === "none"
+              ? `Start ${trialDays}-day free trial`
+              : `Subscribe to ${planName}`}
         </Button>
       ) : null}
 
-      {isActive && !cancelAtPeriodEnd ? (
+      {isTrialing && !hasPaymentMethod ? (
+        <p className="max-w-xs text-xs text-muted-foreground">
+          No payment has been taken. Upgrading now keeps the days left in your trial: your first
+          charge falls on the day it would have ended.
+        </p>
+      ) : null}
+
+      {isActive && hasPaymentMethod && !cancelAtPeriodEnd ? (
         <Button variant="outline" disabled={pending} onClick={() => cancel(true)}>
-          {isTrialing ? "Cancel trial" : "Cancel at period end"}
+          {isTrialing ? "Cancel before first charge" : "Cancel at period end"}
         </Button>
       ) : null}
 

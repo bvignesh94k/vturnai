@@ -6,8 +6,7 @@ import { requireUserContext } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/admin";
 import { getEntitlements } from "@/lib/billing/entitlements";
-import { startTrialSubscription } from "@/lib/billing/subscription-service";
-import { isRazorpayConfigured } from "@/lib/billing/razorpay";
+import { startLocalTrial } from "@/lib/billing/subscription-service";
 import { enqueueJob } from "@/lib/jobs/queue";
 import { completeOnboardingSchema } from "@/lib/validation/schemas";
 import { normalizeSiteUrl, toRegistrableHost } from "@/lib/crawler/url";
@@ -171,17 +170,20 @@ export async function completeOnboardingAction(
     .update({ onboarding_completed_at: new Date().toISOString() })
     .eq("id", context.user.id);
 
-  // Register the trial. If Razorpay is not configured (local development), the
-  // project is still usable, we log it rather than blocking onboarding.
-  if (isRazorpayConfigured() && !entitlements.subscription) {
+  // Start the free trial. This never contacts Razorpay, so it works whether or
+  // not billing is configured and, more importantly, never asks someone for
+  // money to begin something advertised as free.
+  if (!entitlements.subscription) {
     try {
-      await startTrialSubscription({
+      await startLocalTrial({
         organizationId,
         billingEmail: context.activeOrganization.billing_email,
         notes: { project_id: project.id },
       });
     } catch (error) {
-      log.error("Trial subscription could not be created during onboarding", {
+      // A trial that fails to record must not lose the project the user just
+      // created; billing can be repaired, onboarding cannot be replayed.
+      log.error("Trial could not be started during onboarding", {
         organizationId,
         error: errorMessage(error),
       });

@@ -15,7 +15,11 @@ export default async function SettingsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { context, project, entitlements, canWrite } = await loadPageContext(searchParams);
+  // Reachable on an expired plan so an account is never locked away from its
+  // own settings, including the ability to leave.
+  const { context, project, entitlements, canWrite } = await loadPageContext(searchParams, {
+    allowInactiveBilling: true,
+  });
   const supabase = await createServerSupabaseClient();
 
   const { data: settings } = await supabase

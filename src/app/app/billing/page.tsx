@@ -34,7 +34,10 @@ export default async function BillingPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { context, entitlements } = await loadPageContext(searchParams);
+  // Reachable on an expired plan: this is where someone comes to fix it.
+  const { context, entitlements } = await loadPageContext(searchParams, {
+    allowInactiveBilling: true,
+  });
   const supabase = await createServerSupabaseClient();
 
   const [usage, spendUsd, { data: events }] = await Promise.all([
@@ -50,6 +53,9 @@ export default async function BillingPage({
 
   const period = currentUsagePeriod();
   const isBillingAdmin = ["owner", "admin"].includes(context.activeRole);
+  const params = await searchParams;
+  // Set by the trial gate when it redirects someone off a locked page.
+  const arrivedFromGate = params["expired"] === "1";
 
   return (
     <div className="space-y-6">
@@ -57,6 +63,21 @@ export default async function BillingPage({
         title="Billing"
         description="Your plan, what you have used this month, and your payment history."
       />
+
+      {arrivedFromGate && !entitlements.isActive ? (
+        <Alert variant="warning">
+          <InfoIcon />
+          <AlertTitle>
+            {entitlements.status === "expired"
+              ? `Your ${entitlements.trialDays}-day free trial has ended`
+              : "Your plan is not active"}
+          </AlertTitle>
+          <AlertDescription>
+            Your projects, crawls, prompts and reports are all safe and nothing has been deleted.
+            Subscribe to {entitlements.planName} to start monitoring your visibility again.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       {!isRazorpayConfigured() ? (
         <Alert variant="warning">
@@ -126,6 +147,7 @@ export default async function BillingPage({
               status={entitlements.status}
               isActive={entitlements.isActive}
               isTrialing={entitlements.isTrialing}
+              hasPaymentMethod={Boolean(entitlements.subscription?.razorpay_subscription_id)}
               cancelAtPeriodEnd={entitlements.cancelAtPeriodEnd}
               canManage={isBillingAdmin}
               razorpayConfigured={isRazorpayConfigured()}

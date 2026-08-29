@@ -1,6 +1,6 @@
 import "server-only";
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireUserContext, resolveActiveProject, type UserContext } from "@/lib/auth/session";
 import { getEntitlements, type Entitlements } from "@/lib/billing/entitlements";
 import type { ProjectRow } from "@/lib/db/types";
@@ -20,8 +20,19 @@ export interface PageContext {
   canWrite: boolean;
 }
 
+export interface LoadPageContextOptions {
+  /**
+   * Render even when the subscription has lapsed.
+   *
+   * Only for the pages someone must still reach in order to fix their billing:
+   * gating those would trap an expired account with no way out.
+   */
+  allowInactiveBilling?: boolean;
+}
+
 export async function loadPageContext(
   searchParams?: Promise<Record<string, string | string[] | undefined>>,
+  options: LoadPageContextOptions = {},
 ): Promise<PageContext> {
   const context = await requireUserContext();
   const params = searchParams ? await searchParams : {};
@@ -31,6 +42,17 @@ export async function loadPageContext(
   if (!project) notFound();
 
   const entitlements = await getEntitlements(context.activeOrganization.id);
+
+  /**
+   * The trial gate.
+   *
+   * Server-side and on the page itself, because hiding navigation would leave
+   * every one of these routes reachable by typing the URL. The data stays
+   * untouched; only access to it pauses until the account is paid.
+   */
+  if (!entitlements.isActive && !options.allowInactiveBilling) {
+    redirect("/app/billing?expired=1");
+  }
 
   return {
     context,

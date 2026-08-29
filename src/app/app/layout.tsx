@@ -3,6 +3,7 @@ import { AppShell } from "@/components/app/app-shell";
 import { AccountMenu } from "@/components/app/account-menu";
 import { NotificationsMenu } from "@/components/app/notifications-menu";
 import { ProjectSelector } from "@/components/app/project-selector";
+import { TrialBanner } from "@/components/app/trial-banner";
 import { requireUserContext } from "@/lib/auth/session";
 import { getEntitlements } from "@/lib/billing/entitlements";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -65,6 +66,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         />
       }
     >
+      {entitlements.isTrialing && entitlements.trialEndsAt ? (
+        <TrialBanner
+          daysRemaining={entitlements.daysRemainingInTrial ?? 0}
+          trialEndsAt={entitlements.trialEndsAt}
+          hasPaymentMethod={Boolean(entitlements.subscription?.razorpay_subscription_id)}
+          canManageBilling={["owner", "admin"].includes(context.activeRole)}
+        />
+      ) : null}
       {children}
     </AppShell>
   );
