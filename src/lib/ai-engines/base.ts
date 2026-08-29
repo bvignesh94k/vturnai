@@ -9,6 +9,7 @@
 
 import { ENGINES, OBSERVATION_MODES, type EngineId } from "@/lib/config/engines";
 import { analyseAnswer } from "@/lib/metrics/detection";
+import { logger } from "@/lib/logger";
 import { toRegistrableHost } from "@/lib/crawler/url";
 import { unique } from "@/lib/utils";
 import type {
@@ -19,6 +20,8 @@ import type {
   ProviderUnavailableReason,
 } from "@/lib/ai-engines/types";
 import { ProviderRequestError } from "@/lib/ai-engines/types";
+
+const log = logger.child("ai-provider");
 
 export const PROVIDER_TIMEOUT_MS = 60_000;
 export const MAX_OUTPUT_TOKENS = 900;
@@ -194,11 +197,33 @@ export async function postJson(input: {
   } catch (error) {
     clearTimeout(timer);
     const aborted = error instanceof Error && error.name === "AbortError";
+
+    /**
+     * Keep the underlying cause.
+     *
+     * A transport failure has many causes that need completely different fixes:
+     * DNS not resolving, egress blocked by a firewall, TLS rejected, connection
+     * refused. Collapsing them all into "could not be reached" left a real
+     * outage undiagnosable from the outside, which is exactly what happened on
+     * the first production scan. Node puts the useful part in `cause`.
+     */
+    const cause =
+      error instanceof Error
+        ? ((error.cause as { code?: string } | undefined)?.code ?? error.message)
+        : String(error);
+
+    log.error("Provider request could not be sent", {
+      engineId: input.engineId,
+      url: input.url,
+      aborted,
+      cause,
+    });
+
     throw new ProviderRequestError(
       input.engineId,
       aborted
         ? `${ENGINES[input.engineId].name} did not respond within ${(input.timeoutMs ?? PROVIDER_TIMEOUT_MS) / 1000}s.`
-        : `${ENGINES[input.engineId].name} could not be reached.`,
+        : `${ENGINES[input.engineId].name} could not be reached (${cause}).`,
       aborted ? "timeout" : "provider_error",
     );
   }
