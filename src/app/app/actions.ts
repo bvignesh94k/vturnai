@@ -168,8 +168,17 @@ export async function startAiScanAction(formData: FormData): Promise<ActionResul
       return { ok: false, error: executionQuota.reason ?? "AI execution limit reached." };
     }
 
+    /**
+     * Deduplicated per hour so a double-click cannot spend the scan quota
+     * twice.
+     *
+     * The result has to be checked. `enqueueJob` returns null when a job with
+     * this key already exists, and reporting success regardless told people a
+     * scan had started when nothing had been queued, which is indistinguishable
+     * from the product being broken.
+     */
     const hourKey = new Date().toISOString().slice(0, 13);
-    await enqueueJob({
+    const queued = await enqueueJob({
       jobType: "ai_visibility_scan",
       projectId: project.id,
       organizationId: project.organization_id,
@@ -178,6 +187,14 @@ export async function startAiScanAction(formData: FormData): Promise<ActionResul
       priority: 3,
       progressLabel: "Starting AI visibility scan…",
     });
+
+    if (!queued) {
+      return {
+        ok: false,
+        error:
+          "A scan for this project was already started in the past hour. Wait for that one to finish before starting another.",
+      };
+    }
 
     revalidatePath("/app");
     revalidatePath("/app/ai-visibility");
