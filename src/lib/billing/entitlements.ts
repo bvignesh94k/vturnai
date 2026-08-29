@@ -162,17 +162,44 @@ export async function getEntitlements(organizationId: string): Promise<Entitleme
   return entitlements;
 }
 
-/** True when any member of this organisation is a platform admin. */
+/**
+ * True when any member of this organisation is a platform admin.
+ *
+ * Deliberately two plain queries rather than one embedded join.
+ * `organization_members` holds two foreign keys into `profiles`, `user_id` and
+ * `invited_by`, so an unqualified embed is ambiguous and PostgREST refuses it.
+ * That failure surfaced as an operator who had been promoted correctly still
+ * seeing a trial banner, because the error was discarded and read as "not an
+ * admin". Errors are raised here instead: silently downgrading an operator to
+ * a limited plan is worse than failing loudly.
+ */
 async function isPlatformAdminOrganization(organizationId: string): Promise<boolean> {
   const supabase = createServiceRoleClient();
-  const { data } = await supabase
+
+  const { data: members, error: membersError } = await supabase
     .from("organization_members")
-    .select("user_id, profiles!inner(platform_role)")
-    .eq("organization_id", organizationId)
-    .eq("profiles.platform_role", "admin")
+    .select("user_id")
+    .eq("organization_id", organizationId);
+
+  if (membersError) {
+    throw new Error(`Could not read organisation members: ${membersError.message}`);
+  }
+
+  const userIds = (members ?? []).map((row) => row.user_id);
+  if (userIds.length === 0) return false;
+
+  const { data: admins, error: adminsError } = await supabase
+    .from("profiles")
+    .select("id")
+    .in("id", userIds)
+    .eq("platform_role", "admin")
     .limit(1);
 
-  return (data ?? []).length > 0;
+  if (adminsError) {
+    throw new Error(`Could not read platform roles: ${adminsError.message}`);
+  }
+
+  return (admins ?? []).length > 0;
 }
 
 /**
