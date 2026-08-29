@@ -37,6 +37,17 @@ export interface EngineDefinition {
   supportsCitations: boolean;
   /** True when the API performs live web retrieval for the answer. */
   supportsWebSearch: boolean;
+  /**
+   * Hosts this engine uses when it sends a visitor to a site, matched against
+   * the GA4 session source.
+   *
+   * This is a second, independent way to observe an engine. Whether we can put
+   * a question to its API and whether it sends real people to your pages are
+   * different facts, and an engine we cannot query at all can still be measured
+   * this way. Copilot is the clearest case: no API access we can rely on, but
+   * every visit it refers is visible in GA4.
+   */
+  referralHosts: readonly string[];
 }
 
 export const ENGINES: Record<EngineId, EngineDefinition> = {
@@ -49,6 +60,7 @@ export const ENGINES: Record<EngineId, EngineDefinition> = {
     observationNote:
       "Observed through the OpenAI API with web search enabled. This is an API observation, not a reading of the consumer ChatGPT product.",
     envKeys: ["OPENAI_API_KEY"],
+    referralHosts: ["chatgpt.com", "chat.openai.com", "openai.com"],
     supportsCitations: true,
     supportsWebSearch: true,
   },
@@ -61,6 +73,7 @@ export const ENGINES: Record<EngineId, EngineDefinition> = {
     observationNote:
       "Observed through the Gemini API with Google Search grounding. Grounding sources are recorded as citations.",
     envKeys: ["GOOGLE_GEMINI_API_KEY"],
+    referralHosts: ["gemini.google.com", "bard.google.com"],
     supportsCitations: true,
     supportsWebSearch: true,
   },
@@ -73,6 +86,7 @@ export const ENGINES: Record<EngineId, EngineDefinition> = {
     observationNote:
       "Observed through the Anthropic API with the web search tool enabled. Web citations returned by the tool are recorded.",
     envKeys: ["ANTHROPIC_API_KEY"],
+    referralHosts: ["claude.ai"],
     supportsCitations: true,
     supportsWebSearch: true,
   },
@@ -85,6 +99,7 @@ export const ENGINES: Record<EngineId, EngineDefinition> = {
     observationNote:
       "Observed through the Perplexity Sonar API, which answers from live web retrieval and returns the URLs it used.",
     envKeys: ["PERPLEXITY_API_KEY"],
+    referralHosts: ["perplexity.ai"],
     supportsCitations: true,
     supportsWebSearch: true,
   },
@@ -97,6 +112,7 @@ export const ENGINES: Record<EngineId, EngineDefinition> = {
     observationNote:
       "Observed through the xAI API with live search enabled. Citations are recorded when the API returns them.",
     envKeys: ["XAI_API_KEY"],
+    referralHosts: ["grok.com", "x.ai"],
     supportsCitations: true,
     supportsWebSearch: true,
   },
@@ -109,6 +125,7 @@ export const ENGINES: Record<EngineId, EngineDefinition> = {
     observationNote:
       "Requires a Microsoft 365 Copilot Chat API connection and eligible licensing. V Turn AI never scrapes the consumer Copilot website, and shows no data unless a real connection returns it.",
     envKeys: ["MICROSOFT_CLIENT_ID", "MICROSOFT_CLIENT_SECRET", "MICROSOFT_TENANT_ID"],
+    referralHosts: ["copilot.microsoft.com", "bing.com"],
     featureFlag: "COPILOT_PROVIDER_ENABLED",
     supportsCitations: true,
     supportsWebSearch: true,

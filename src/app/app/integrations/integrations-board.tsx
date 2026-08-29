@@ -45,15 +45,13 @@ const STATUS_META = {
 
 export function IntegrationsBoard({
   projectId,
-  searchCards,
-  engineCards,
+  searchCards,
   canWrite,
   hasGoogleAccount,
   selectedSearchConsoleSite,
 }: {
   projectId: string;
-  searchCards: readonly IntegrationCard[];
-  engineCards: readonly IntegrationCard[];
+  searchCards: readonly IntegrationCard[];
   canWrite: boolean;
   hasGoogleAccount: boolean;
   selectedSearchConsoleSite: string | null;
@@ -253,42 +251,6 @@ export function IntegrationsBoard({
         </div>
       </section>
 
-      <section>
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          AI engines
-        </h3>
-        <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-          AI provider keys are configured at the deployment level, not per account, so no customer
-          ever handles a provider secret. An engine without a key reports as unavailable and shows no
-          data. We never estimate a figure to fill the gap.
-        </p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {engineCards.map((card) => {
-            const meta = STATUS_META[card.status];
-            const Icon = meta.icon;
-            return (
-              <Card key={card.provider}>
-                <CardContent className="px-5 py-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Icon className="size-4 shrink-0 text-muted-foreground" />
-                    <p className="text-sm font-semibold">{card.name}</p>
-                    <Badge variant={meta.variant}>{meta.label}</Badge>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground">{card.vendor}</p>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                    {card.description}
-                  </p>
-                  {card.statusMessage ? (
-                    <p className="mt-2 text-xs text-[color-mix(in_oklch,var(--warning)_80%,var(--foreground))]">
-                      {card.statusMessage}
-                    </p>
-                  ) : null}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
     </div>
   );
 }
