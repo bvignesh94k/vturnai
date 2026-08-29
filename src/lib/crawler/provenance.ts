@@ -170,6 +170,56 @@ export async function getProvenance(input: {
 }
 
 /**
+ * One readable line per URL saying how we found it, keyed by the URL as given.
+ *
+ * Where a page was found several ways the strongest evidence wins, because a
+ * reader wants the most convincing answer to "why is this here", not a list.
+ * Being linked from a real page beats being declared in a sitemap, which in
+ * turn beats an integration merely reporting the address.
+ */
+export async function getProvenanceLabels(input: {
+  projectId: string;
+  urls: string[];
+}): Promise<Record<string, string>> {
+  const labels: Record<string, string> = {};
+  if (input.urls.length === 0) return labels;
+
+  const provenance = await getProvenance(input);
+
+  for (const url of input.urls) {
+    const normalized = normalizeUrl(url);
+    const entry = normalized ? provenance.get(normalized) : undefined;
+    if (!entry || entry.sources.length === 0) continue;
+
+    const best = [...entry.sources].sort(
+      (a, b) => SOURCE_STRENGTH.indexOf(a.type) - SOURCE_STRENGTH.indexOf(b.type),
+    )[0];
+    if (!best) continue;
+
+    labels[url] =
+      best.type === "internal_link" && best.detail
+        ? `Linked from ${best.detail.replace(/^https?:\/\//, "")}`
+        : best.label;
+  }
+
+  return labels;
+}
+
+/** Most convincing evidence first. Used to pick which source to show. */
+const SOURCE_STRENGTH: readonly UrlSource[] = [
+  "internal_link",
+  "project_seed",
+  "sitemap",
+  "canonical",
+  "redirect",
+  "search_console",
+  "bing_webmaster",
+  "analytics_landing_page",
+  "user_input",
+  "suggested",
+];
+
+/**
  * Which of these URLs we can account for.
  *
  * Opportunity generation resolves this once for a whole batch before writing

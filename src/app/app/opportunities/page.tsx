@@ -6,6 +6,7 @@ import { OpportunityBoard } from "@/app/app/opportunities/opportunity-board";
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { getProvenanceLabels } from "@/lib/crawler/provenance";
 import { loadPageContext } from "@/lib/data/project-context";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { round } from "@/lib/utils";
@@ -50,6 +51,17 @@ export default async function OpportunitiesPage({
     .limit(200);
 
   const rows = opportunities ?? [];
+
+  /**
+   * Provenance for every page these findings name, so each one can be shown
+   * with how we found it. A URL a customer cannot trace is a URL they are right
+   * not to trust, and the alternative is asking them to take our word for it.
+   */
+  const provenanceByUrl = await getProvenanceLabels({
+    projectId: project.id,
+    urls: rows.flatMap((row) => row.affected_urls.slice(0, 10)),
+  });
+
   const open = rows.filter((row) => row.status === "open");
   const inProgress = rows.filter((row) => row.status === "in_progress");
   const completed = rows.filter((row) => row.status === "completed");
@@ -108,6 +120,7 @@ export default async function OpportunitiesPage({
       <OpportunityBoard
         projectId={project.id}
         canWrite={canWrite}
+        provenance={provenanceByUrl}
         opportunities={rows.map((row) => ({
           id: row.id,
           title: row.title,

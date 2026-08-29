@@ -53,10 +53,13 @@ export function OpportunityBoard({
   projectId,
   opportunities,
   canWrite,
+  provenance,
 }: {
   projectId: string;
   opportunities: readonly OpportunityView[];
   canWrite: boolean;
+  /** How each affected page was discovered, keyed by URL. */
+  provenance: Record<string, string>;
 }) {
   const router = useRouter();
   const [tab, setTab] = React.useState<OpportunityStatus | "all">("open");
@@ -222,7 +225,7 @@ export function OpportunityBoard({
                         <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                           Affected pages
                         </h4>
-                        <ul className="mt-2 space-y-1">
+                        <ul className="mt-2 space-y-1.5">
                           {opportunity.affectedUrls.slice(0, 10).map((url) => (
                             <li key={url}>
                               <a
@@ -234,6 +237,14 @@ export function OpportunityBoard({
                                 {truncate(url.replace(/^https?:\/\//, ""), 80)}
                                 <ExternalLinkIcon className="size-3 shrink-0" />
                               </a>
+                              {/* How we found this page. Shown so a reader can
+                                  verify the URL themselves rather than taking
+                                  our word that it belongs to their site. */}
+                              {provenance[url] ? (
+                                <span className="block text-[11px] leading-snug text-muted-foreground">
+                                  {provenance[url]}
+                                </span>
+                              ) : null}
                             </li>
                           ))}
                         </ul>
