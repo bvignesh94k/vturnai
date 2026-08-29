@@ -176,7 +176,98 @@ export function buildStatus(engineId: EngineId): ProviderStatus {
 }
 
 /** POST JSON with a timeout, mapping transport and HTTP failures onto provider errors. */
+/** How many times a rate-limited request is retried before giving up. */
+const RATE_LIMIT_RETRIES = 1;
+/**
+ * Longest we will wait for a rate limit to clear.
+ *
+ * The job worker runs on a 50 second budget, so a wait plus the retried
+ * request has to finish well inside that. A provider asking for longer than
+ * this is not worth blocking the whole batch for: the run is recorded as
+ * rate limited and the next scheduled scan picks it up, which is a far better
+ * outcome than the worker being killed mid-write and leaving a half-recorded
+ * scan behind.
+ */
+const MAX_RETRY_WAIT_MS = 25_000;
+
+/**
+ * Seconds a provider asked us to wait, read from its own response.
+ *
+ * Providers state this in different places: a `retry-after` header, or inside
+ * the error message ("Please try again in 40.668s"). Guessing a backoff when
+ * the provider has told us the exact number is how a scan burns its attempts
+ * retrying too early.
+ */
+function retryAfterMs(response: Response, detail: string): number | null {
+  // A slight margin over whatever the provider states: retrying on the exact
+  // boundary tends to land just inside the window and fail again.
+  const withMargin = (seconds: number) => seconds * 1000 + 1_000;
+
+  const header = response.headers.get("retry-after");
+  if (header) {
+    const seconds = Number(header);
+    if (Number.isFinite(seconds) && seconds > 0) return withMargin(seconds);
+  }
+
+  const match = /try again in ([\d.]+)\s*s/i.exec(detail);
+  if (match?.[1]) {
+    const seconds = Number(match[1]);
+    if (Number.isFinite(seconds) && seconds > 0) return withMargin(seconds);
+  }
+
+  return null;
+}
+
+/**
+ * POST JSON, retrying when the provider says it is rate limited.
+ *
+ * A visibility scan sends several prompts in sequence, and each answer with
+ * web search enabled can consume most of a low tier's per-minute token budget.
+ * On a new account that reliably produces a 429 partway through, and without
+ * this the whole scan is recorded as failed even though the provider was only
+ * asking us to slow down. The wait comes from the provider's own response
+ * rather than a guess.
+ */
 export async function postJson(input: {
+  engineId: EngineId;
+  url: string;
+  headers: Record<string, string>;
+  body: unknown;
+  timeoutMs?: number;
+}): Promise<unknown> {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await postJsonOnce(input);
+    } catch (error) {
+      const isRateLimit =
+        error instanceof ProviderRequestError && error.reason === "rate_limited";
+
+      if (!isRateLimit || attempt >= RATE_LIMIT_RETRIES) throw error;
+
+      const wait = error.retryAfterMs ?? 15_000;
+
+      // Waiting longer than the worker's remaining budget would get the whole
+      // job killed mid-write, which loses more than this one prompt.
+      if (wait > MAX_RETRY_WAIT_MS) {
+        log.warn("Provider rate limited for longer than we can wait", {
+          engineId: input.engineId,
+          requestedWaitMs: wait,
+          maxWaitMs: MAX_RETRY_WAIT_MS,
+        });
+        throw error;
+      }
+
+      log.warn("Provider rate limited, waiting before retry", {
+        engineId: input.engineId,
+        attempt: attempt + 1,
+        waitMs: wait,
+      });
+      await new Promise((resolve) => setTimeout(resolve, wait));
+    }
+  }
+}
+
+async function postJsonOnce(input: {
   engineId: EngineId;
   url: string;
   headers: Record<string, string>;
@@ -231,12 +322,20 @@ export async function postJson(input: {
 
   if (!response.ok) {
     const detail = await safeErrorText(response);
-    throw new ProviderRequestError(
+    const error = new ProviderRequestError(
       input.engineId,
       `${ENGINES[input.engineId].name} returned HTTP ${response.status}${detail ? `: ${detail}` : ""}`,
       classifyStatus(response.status),
       response.status,
     );
+
+    // Carried on the error so the retry layer can honour the provider's own
+    // stated wait rather than inventing a backoff.
+    if (response.status === 429) {
+      error.retryAfterMs = retryAfterMs(response, detail);
+    }
+
+    throw error;
   }
 
   try {

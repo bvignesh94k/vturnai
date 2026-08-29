@@ -85,6 +85,13 @@ export class ProviderRequestError extends Error {
   readonly reason: ProviderUnavailableReason;
   readonly providerId: string;
   readonly status?: number;
+  /**
+   * How long the provider asked us to wait, when it said so.
+   *
+   * Set only for rate-limit responses, and read straight from the provider's
+   * `retry-after` header or error message rather than guessed.
+   */
+  retryAfterMs?: number | null;
   constructor(
     providerId: string,
     message: string,
