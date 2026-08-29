@@ -54,6 +54,15 @@ echo "$NEW_CRON" | crontab -
 crontab -l | grep "$MARKER"
 
 # --- 3. Prove the endpoint actually answers --------------------------------
+# `pm2 restart` returns as soon as the process is spawned, but Next.js needs a
+# few seconds before it accepts connections. Without this wait the test-fire
+# races the boot and reports an unreachable app that is merely still starting.
+say "Waiting for the app to accept connections"
+for _ in $(seq 1 20); do
+  curl -s -o /dev/null -m 3 "${BASE_URL}/login" && break
+  sleep 1
+done
+
 say "Test-firing the worker"
 CODE="$(curl -s -o /tmp/vturnai-cron-test.json -w '%{http_code}' -m 55 \
   -H "Authorization: Bearer ${SECRET}" "${BASE_URL}/api/cron/process-jobs" || true)"
