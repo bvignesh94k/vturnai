@@ -1,9 +1,11 @@
 name: Process Jobs
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Every 5 minutes
+    - cron: '*/5 * * * *'
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - run: curl -X POST https://vturnai.com/api/cron/process-jobs -H "Authorization: Bearer b0dc49e7118a651d12d36157ef716a55fcc0dcf31eab2e368053122621c24da6"
+      - run: >-
+          curl -X POST https://vturnai.com/api/cron/process-jobs
+          -H "Authorization: Bearer b0dc49e7118a651d12d36157ef716a55fcc0dcf31eab2e368053122621c24da6"
