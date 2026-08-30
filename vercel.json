@@ -7,8 +7,5 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 60
     }
-  },
-  "env": {
-    "CRON_SECRET": "@cron_secret"
   }
 }
