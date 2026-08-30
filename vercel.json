@@ -1,13 +1,21 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "nodeVersion": "20.x",
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 60
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/process-jobs",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron/daily",
-      "schedule": "15 2 * * *"
+      "schedule": "*/2 * * * *"
     }
-  ]
+  ],
+  "env": {
+    "CRON_SECRET": "@cron_secret"
+  }
 }
