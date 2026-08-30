@@ -97,8 +97,16 @@ export function ProjectSelector({
             <PlusIcon /> Add a website
           </DropdownMenuItem>
         ) : (
-          <div className="px-2 py-1.5 text-xs leading-relaxed text-muted-foreground">
-            Your plan includes {projectLimit} project{projectLimit === 1 ? "" : "s"}.
+          <div className="space-y-2 px-2 py-2">
+            <p className="text-xs font-medium text-muted-foreground">
+              Your plan includes {projectLimit} project{projectLimit === 1 ? "" : "s"}
+            </p>
+            <button
+              onClick={() => router.push("/app/billing")}
+              className="w-full rounded-md bg-primary-soft px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+            >
+              Upgrade to add more
+            </button>
           </div>
         )}
       </DropdownMenuContent>
